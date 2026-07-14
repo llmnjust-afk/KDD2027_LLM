@@ -1,0 +1,90 @@
+\section{Method}
+\label{sec:method}
+
+KG-SCoRE takes a biomedical KG derived from SemMedDB-style triples and a research question, and outputs ranked, traceable hypotheses. Figure~\ref{fig:framework} shows the four modules. We detail each below.
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figures/framework.png}
+  \caption{KG-SCoRE pipeline. Module~A verifies KG triples via LLM prompting (optionally gated by ComplEx scores). Module~B retrieves scored multi-hop subgraphs. Module~C generates KG-scaffolded hypotheses. Module~D verifies faithfulness against KG paths.}
+  \label{fig:framework}
+\end{figure}
+
+\subsection{Problem Formulation}
+Let $\mathcal{G}=(\mathcal{E},\mathcal{R},\mathcal{T})$ be a KG with entities $\mathcal{E}$, relations $\mathcal{R}$, and triples $\mathcal{T}=\{(h,r,t)\}$. Given a research question $q$ with seed entity $e_s\in\mathcal{E}$, the goal is to produce a ranked list of hypotheses $\mathcal{H}=\{h_1,\dots,h_K\}$, where each $h_i$ is associated with a KG path $\pi_i=(e_s,r_1,e_1,\dots,r_m,e_t)$, such that (i) $h_i$ is \emph{novel}: the direct link $e_s\!\to\!e_t$ is not stated in $\mathcal{T}$ (though a multi-hop path $e_s \xrightarrow{r_1} \cdots \xrightarrow{r_m} e_t$ may exist), and (ii) $h_i$ is \emph{faithful}: it is entailed by $\pi_i$.
+
+\subsection{Module A: KG Verification}
+\label{sec:method:a}
+
+Module~A cleans and audits the KG by verifying triples via LLM prompting. An optional ComplEx-based scoring stage can gate which triples are verified.
+
+\paragraph{Optional learned triple scoring.}
+We may train a ComplEx~\cite{trouillon2016complex} embedding model on $\mathcal{T}$. Each entity $e$ and relation $r$ is mapped to complex vectors $\mathbf{e},\mathbf{r}\in\mathbb{C}^d$. The plausibility of a triple $(h,r,t)$ is
+\begin{equation}
+  \label{eq:complex}
+  s(h,r,t) = \mathrm{Re}\!\left(\sum_{k=1}^{d} \mathbf{h}_k\,\mathbf{r}_k\,\overline{\mathbf{t}_k}\right),
+\end{equation}
+trained with negative sampling and softplus loss. After training, every triple receives a score $s_i$; low scores flag potentially noisy triples. However, as our experiments show (Sec.~\ref{sec:exp:ablation}), when the KG-completion model has low MRR, this gating is counterproductive. In the primary configuration, \textbf{all} retrieved triples are verified by the LLM without ComplEx gating.
+
+\paragraph{LLM verification.}
+For each triple in the retrieved subgraph, we prompt the LLM with the triple and optional text context, asking it to output a verdict $v\in\{\textsc{supported},\textsc{contradicted},\textsc{unverifiable}\}$ and, if contradicted, a corrected object $\hat{t}$. The verified KG $\mathcal{G}'$ is:
+\begin{equation}
+  \mathcal{T}' = \{(h,r,t)\in\mathcal{T}\mid v_i=\textsc{supported}\}\;\cup\;\{(h,r,\hat{t})\mid v_i=\textsc{contradicted}\}.
+\end{equation}
+Triples marked \textsc{unverifiable} or \textsc{contradicted} without a correction are deleted. This is the core of KG-SCoRE: the LLM cleans the KG it will later reason over.
+
+\paragraph{Complexity.}
+For each query, Module~A verifies $K$ triples (default $K{=}40$), requiring $K$ LLM calls. Module~C requires 1 LLM call for generation, and Module~D requires $K$ LLM calls for faithfulness checking. Total: $\sim$$2K{+}1$ LLM calls per query ($\sim$81 calls with $K{=}40$).
+
+\subsection{Module B: Symbolic Subgraph Retrieval}
+\label{sec:method:b}
+
+Given seed entity $e_s$, we perform bounded-depth BFS over $\mathcal{G}'$ up to $L$ hops ($L{=}2$), collecting triples along the way. The subgraph $\mathcal{S}(e_s)$ is the top-$K$ triples:
+\begin{equation}
+  \mathcal{S}(e_s) = \mathrm{TopK}_{(h,r,t)\in\mathrm{BFS}_L(e_s;\,\mathcal{G}')}\; |s(h,r,t)|.
+\end{equation}
+In the primary configuration (no ComplEx), all retrieved triples are ranked by retrieval order.
+
+\subsection{Module C: Symbolic-Scaffolded Generation}
+\label{sec:method:c}
+
+We prompt the LLM with the research question $q$, the subgraph $\mathcal{S}(e_s)$ rendered as pipe-delimited triples, and optional text snippets. The prompt instructs the LLM to (i) reason step-by-step over KG paths, (ii) generate $K$ ranked hypotheses, and (iii) for each hypothesis emit an explicit \texttt{KG\_PATH} chain $e_s\!\xrightarrow{r_1}\!e_1\!\xrightarrow{r_2}\!\cdots\!\xrightarrow{r_m}\!e_t$. Forcing the path output enables downstream faithfulness verification.
+
+\subsection{Module D: Faithfulness Verification}
+\label{sec:method:d}
+
+For each hypothesis $h_i$ with path $\pi_i$, we prompt the LLM (as a strict judge) to classify entailment as $f_i\in\{\textsc{entailed},\textsc{partial},\textsc{none}\}$. We report two variants of the metric:
+\begin{equation}
+  \label{eq:faith_strict}
+  \mathrm{StrictFaith}@k = \frac{1}{\min(k,|\mathcal{H}|)}\sum_{i=1}^{\min(k,|\mathcal{H}|)} \mathbb{1}\!\left[f_i=\textsc{entailed}\right],
+\end{equation}
+\begin{equation}
+  \label{eq:faith_broad}
+  \mathrm{BroadFaith}@k = \frac{1}{\min(k,|\mathcal{H}|)}\sum_{i=1}^{\min(k,|\mathcal{H}|)} \mathbb{1}\!\left[f_i\in\{\textsc{entailed},\textsc{partial}\}\right].
+\end{equation}
+StrictFaith counts only fully entailed hypotheses; BroadFaith also counts partial support. We additionally report \emph{path coverage}: the fraction of hypotheses for which a KG path can be extracted. This decomposition addresses the concern that counting ``partial'' as faithful may overstate grounding.
+
+Unlike text-overlap faithfulness metrics used in RAG~\cite{brown2025systematic}, our metric verifies entailment against structured symbolic paths. While RoG~\cite{luo2024graphconstrained} constrains generation to KG-grounded paths during decoding, it does not post-hoc verify whether the final output is entailed by a specific path; KG-SCoRE adds this verification step.
+
+\subsection{Full Pipeline and Ablation Configurations}
+Algorithm~\ref{alg:kgscore} summarizes the pipeline. ComplEx scoring (Line 1) is \emph{optional}; the primary configuration skips it and verifies all retrieved triples. Ablation configurations: \texttt{raw\_kg} (no verification), \texttt{+llm} (LLM verification, no faithfulness check), \texttt{+llm+faith} (LLM verification + faithfulness, no ComplEx — the primary mode), \texttt{+learned} (ComplEx scoring only), \texttt{full} (all modules including ComplEx), \texttt{no\_kg} (KG scaffold off), \texttt{no\_faith} (Module~D off).
+
+\begin{algorithm}[tb]
+\caption{KG-SCoRE inference}
+\label{alg:kgscore}
+\begin{algorithmic}[1]
+\Require KG $\mathcal{G}$, question $q$, seed $e_s$, thresholds $K,L$
+\Statex \textcolor{gray}{\textit{// Optional: ComplEx scoring (Module A)}}
+\If{ComplEx enabled}
+  \State Train ComplEx on $\mathcal{T}$; compute scores $s_i$
+  \State $\mathcal{G}' \gets \mathrm{Filter}(\mathcal{G}, \{s_i\}, \tau)$
+\Else
+  \State $\mathcal{G}' \gets \mathcal{G}$
+\EndIf
+\State $\mathcal{S} \gets \mathrm{TopK}(\mathrm{BFS}_L(e_s;\, \mathcal{G}'))$ \Comment{Module B}
+\State Verify each triple in $\mathcal{S}$ via LLM \Comment{Module A (primary)}
+\State $\mathcal{H} \gets \mathrm{LLM\_Generate}(q, \mathcal{S})$ with paths $\{\pi_i\}$ \Comment{Module C}
+\State $f_i \gets \mathrm{LLM\_Judge}(h_i, \pi_i)$ for each $i$ \Comment{Module D}
+\State \Return ranked $\mathcal{H}$ with faithfulness labels $\{f_i\}$
+\end{algorithmic}
+\end{algorithm}

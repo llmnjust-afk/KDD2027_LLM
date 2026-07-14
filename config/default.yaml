@@ -1,0 +1,56 @@
+project:
+  name: "KG-SCoRE"
+  version: "0.1.0"
+  seed: 42
+
+paths:
+  data_dir: "data"
+  semmeddb_dir: "data/semmeddb"
+  lbd_gold_dir: "data/lbd_gold"
+  kgqa_dir: "data/kgqa"
+  runs_dir: "experiments/runs"
+  results_dir: "experiments/results"
+  checkpoint_dir: "experiments/checkpoints"
+  figures_dir: "figures"
+
+kg:
+  source: "semmeddb"          # semmeddb | synthetic
+  sample_mode: true           # use sampled subset for fast iteration
+  sample_size: 200000         # triples to sample in sample mode
+  max_hops: 2                 # multi-hop subgraph depth
+  topk_triples: 40            # triples per retrieved subgraph
+  min_confidence: 0.15        # ComplEx score threshold for pruning
+
+completion:
+  model: "complex"            # complex | rotate | transe
+  embedding_dim: 200
+  lr: 0.1
+  epochs: 200
+  batch_size: 1024
+  negative_samples: 128
+  train_frac: 0.8
+  valid_frac: 0.1
+
+llm:
+  provider: "chatanywhere"   # openai | chatanywhere | together | local
+  model: "gpt-4o-mini"
+  temperature: 0.2
+  max_tokens: 1024
+  max_retries: 5
+  timeout: 60
+  rate_limit_rpm: 500
+  # For local vLLM:
+  # provider: "local"
+  # base_url: "http://localhost:8000/v1"
+
+generation:
+  num_hypotheses: 10          # hypotheses per query
+  use_kg_scaffold: true       # Module C: condition on KG subgraph
+  refine_with_completion: true # Module A: learned scoring gate
+  faithfulness_check: true    # Module D: verify output
+
+evaluation:
+  top_k: [1, 5, 10]
+  num_bootstrap: 1000
+  significance_alpha: 0.05
+  annotation_sample: 300

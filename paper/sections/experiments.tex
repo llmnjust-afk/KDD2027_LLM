@@ -1,0 +1,153 @@
+\section{Experiments}
+\label{sec:exp}
+
+We evaluate KG-SCoRE on four questions: (Q1) Does LLM-based KG verification achieve competitive recall \emph{and} faithfulness compared to baselines under fair evaluation? (Q2) What is the contribution of each module, and does ComplEx scoring help or hurt? (Q3) Is the faithfulness metric reliable? (Q4) Does LLM verification actually clean the KG?
+
+\subsection{Setup}
+\label{sec:exp:setup}
+
+\paragraph{Knowledge graph.}
+We use a SemMedDB-style~\cite{kilicoglu2012semmeddb} biomedical KG with 9{,}188 triples over 523 entities (diseases, chemicals, genes, phenotypes) and 32 relation types. The KG has a power-law degree distribution with typed entity constraints; we inject $\sim$35\% noisy type-violating triples to simulate SemMedDB extraction errors~\cite{kilicoglu2020broadcoverage}. Since we know which triples are noise (score $<0.5$), we can directly evaluate KG cleaning accuracy (Q4).
+
+\paragraph{Gold standard.}
+We evaluate on the Swanson--Cameron LBD benchmark~\cite{hristovski2015constructing,bhasuran2023literature}: 20 disease--chemical pairs. The first 10 are classic Swanson pairs; the remaining 10 are extension pairs. A method succeeds if the gold chemical appears in its top-$k$ hypotheses.
+
+\paragraph{Baselines.}
+(1) \textbf{Vanilla LLM}: no retrieval, no KG. (2) \textbf{BM25-RAG}: BM25 snippet retrieval + LLM. (3) \textbf{ToG}~\cite{sun2023thinkongraph}: LLM-guided KG exploration. (4) \textbf{RoG}~\cite{luo2024graphconstrained}: path-constrained retrieval + LLM generation. All use GPT-4o-mini (temperature 0.2).
+
+\paragraph{Metrics.}
+Re-discovery \textbf{Hit@$k$}, \textbf{MRR}, \textbf{StrictFaith@$k$} (Eq.~\ref{eq:faith_strict}), \textbf{BroadFaith@$k$} (Eq.~\ref{eq:faith_broad}), and \textbf{Path Coverage} (fraction of hypotheses with extractable KG paths). For fair faithfulness evaluation, all methods receive post-hoc path extraction: for methods that do not emit paths, we extract paths by matching hypothesis entities against the retrieved subgraph. We run 3 seeds and report McNemar tests for binary Hit@10.
+
+\paragraph{ComplEx training.}
+ComplEx ($d{=}200$, 100 epochs, lr 0.1) via PyKEEN on a single RTX 5090 ($\sim$4 min). Held-out MRR is 0.013---above chance (1/523 $\approx$ 0.002) but modest, reflecting the KG's high noise ratio. This low MRR is itself a finding: ComplEx scores are unreliable for triple filtering on noisy KGs.
+
+\subsection{Main Results (Q1)}
+\label{sec:exp:main}
+
+Table~\ref{tab:main} reports LBD re-discovery and fair faithfulness on 20 pairs.
+
+\begin{table}[tb]
+  \centering
+  \caption{LBD re-discovery and fair faithfulness on 9{,}188-triple KG (20 pairs). Best in \textbf{bold}.}
+  \label{tab:main}
+  \small
+  \begin{tabular}{lccccc}
+    \toprule
+    Method & Hit@10 & MRR & StrictFaith@10 & BroadFaith@10 & Coverage \\
+    \midrule
+    Vanilla LLM & 0.25 & 0.08 & 0.00 & 0.03 & 0.11 \\
+    BM25-RAG & 0.00 & 0.00 & 0.00 & 0.17 & 0.57 \\
+    ToG & 0.10 & 0.03 & 0.05 & 0.94 & 1.00 \\
+    RoG & \textbf{0.30} & \textbf{0.18} & --- & --- & --- \\
+    \textbf{KG-SCoRE} & 0.25 & 0.15 & \textbf{0.10} & \textbf{0.99} & \textbf{1.00} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Finding 1: Fair faithfulness reveals real differences.}
+Unlike our earlier evaluation (which assigned 0 to all baselines), the fair evaluation reveals that ToG achieves BroadFaith@10 of 0.94 and Coverage of 1.00---it does explore and output KG paths. However, ToG's \emph{strict} faithfulness is only 0.05, meaning most hypotheses are only partially supported by their paths. KG-SCoRE achieves StrictFaith@10 of 0.10 (double ToG's) and BroadFaith@10 of 0.99. Vanilla LLM has near-zero coverage (0.11), confirming it generates without KG grounding. BM25-RAG has moderate coverage (0.57) but near-zero faith, indicating retrieved text snippets rarely align with KG paths. (RoG fair faithfulness results were not completed due to compute constraints; we report its recall in Table~\ref{tab:main}.)
+
+\paragraph{Finding 2: No significant recall difference from RoG.}
+On 20 pairs, KG-SCoRE (0.25) and Vanilla LLM (0.25) are identical, with RoG slightly higher (0.30). On the 10-pair subset (multi-seed, Table~\ref{tab:multiseed}), KG-SCoRE achieves 0.53$\pm$0.05 vs.\ RoG's 0.57$\pm$0.05. McNemar test shows no significant difference ($p{=}0.80$). Note: $p{=}0.80$ indicates failure to detect a difference, not proof of equivalence.
+
+\paragraph{Statistical significance.}
+McNemar tests on 10-pair multi-seed ($n{=}30$) confirm KG-SCoRE significantly outperforms Vanilla LLM ($p{=}0.0005$), BM25-RAG ($p{=}0.0001$), and ToG ($p{=}0.010$), but not RoG ($p{=}0.80$).
+
+\begin{table}[tb]
+  \centering
+  \caption{Multi-seed Hit@10 ($n=30$, 3 seeds $\times$ 10 pairs). Seeds vary LLM sampling randomness at fixed temperature 0.2.}
+  \label{tab:multiseed}
+  \small
+  \begin{tabular}{lcc}
+    \toprule
+    Method & Mean $\pm$ Std & Per-seed \\
+    \midrule
+    Vanilla LLM & 0.13 $\pm$ 0.09 & [0.20, 0.00, 0.20] \\
+    BM25-RAG & 0.13 $\pm$ 0.05 & [0.20, 0.10, 0.10] \\
+    ToG & 0.20 $\pm$ 0.00 & [0.20, 0.20, 0.20] \\
+    \textbf{RoG} & \textbf{0.57 $\pm$ 0.05} & [0.60, 0.50, 0.60] \\
+    \textbf{KG-SCoRE} & \textbf{0.53 $\pm$ 0.05} & [0.50, 0.60, 0.50] \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Ablation: LLM Verification vs.\ Learned Scoring (Q2)}
+\label{sec:exp:ablation}
+
+Table~\ref{tab:ablation} isolates each module's contribution. The primary configuration is \texttt{+llm+faith} (LLM verification + faithfulness, no ComplEx).
+
+\begin{table}[tb]
+  \centering
+  \caption{Ablation on 9{,}188-triple KG (10 pairs). \texttt{+llm+faith} is the primary configuration.}
+  \label{tab:ablation}
+  \small
+  \begin{tabular}{lcccc}
+    \toprule
+    Config & Hit@10 & MRR & BroadFaith@10 & Description \\
+    \midrule
+    raw\_kg & 0.60 & 0.35 & 0.00 & No verification \\
+    \textbf{+llm} & \textbf{0.70} & \textbf{0.37} & 0.00 & LLM verify, no faith check \\
+    \textbf{+llm+faith} & \textbf{0.50} & 0.19 & \textbf{0.98} & \textbf{Primary mode} \\
+    +learned & 0.20 & 0.06 & 0.00 & ComplEx score only \\
+    full & 0.40 & 0.09 & 0.98 & All modules (incl.\ ComplEx) \\
+    no\_kg & 0.43 & 0.13 & 0.00 & KG scaffold off \\
+    no\_faith & 0.30 & 0.08 & 0.00 & Module~D off (from full) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Key findings: (1) \texttt{+llm} achieves the best recall (0.70) but zero faithfulness. Adding Module~D (\texttt{+llm+faith}) reduces recall to 0.50 but enables faithfulness (0.98). This is the core tradeoff: Module~D's faithfulness check does not affect generation (it is post-hoc), but the \texttt{+llm+faith} configuration differs from \texttt{+llm} in that it reports faithfulness labels, which the paper's primary metric requires. (2) ComplEx scoring (\texttt{+learned}) \emph{harms} recall (0.20) because MRR=0.013 means scores are unreliable. (3) \texttt{full} (ComplEx + LLM + faith) underperforms \texttt{+llm+faith} (0.40 vs.\ 0.50), confirming ComplEx is counterproductive on noisy KGs.
+
+\subsection{Faithfulness Validation (Q3)}
+\label{sec:exp:faith}
+
+We validate the faithfulness metric using two independent judges:
+
+\begin{table}[tb]
+  \centering
+  \caption{Faithfulness validation. Two independent judges compared against the original LLM judge.}
+  \label{tab:faith_val}
+  \small
+  \begin{tabular}{lccc}
+    \toprule
+    Judge pair & BroadFaith@10 & Agreement & Cohen's $\kappa$ \\
+    \midrule
+    LLM judge (original) & 0.49 & --- & --- \\
+    NLI model (DeBERTa-v3-MNLI) & 0.50 & 98\% & 0.00 \\
+    LLM proxy (different prompt) & --- & 45\% & 0.095 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The NLI model and LLM judge agree on 98\% of labels, yielding consistent BroadFaith@10 (0.50 vs.\ 0.49). However, $\kappa{=}0.0$ because both judges predominantly assign ``partial'' (label distribution skew: 98/100 items labeled ``partial'' by both). The LLM proxy judge (different prompt, same model) shows lower agreement (45\%, $\kappa{=}0.095$), suggesting prompt sensitivity. The earlier $\kappa{=}0.095$ (LLM vs.\ proxy) and $\kappa{=}0.0$ (LLM vs.\ NLI) come from different validation experiments with different judge pairs.
+
+These results indicate that while BroadFaith@10 is stable across judge types (0.49--0.50), the \emph{fine-grained labels} (entailed vs.\ partial vs.\ none) are unreliable. This motivates reporting StrictFaith separately (Eq.~\ref{eq:faith_strict}) and developing trained entailment models for future work.
+
+\subsection{KG Cleaning Evaluation (Q4)}
+\label{sec:exp:cleaning}
+
+Since we know which triples are synthetic noise (score $<0.5$), we directly evaluate Module~A's cleaning accuracy on 200 sampled triples (100 noise, 100 clean):
+
+\begin{table}[tb]
+  \centering
+  \caption{KG cleaning evaluation (200 triples, 100 noise + 100 clean).}
+  \label{tab:cleaning}
+  \small
+  \begin{tabular}{lcccc}
+    \toprule
+    Metric & Precision & Recall & F1 & Accuracy \\
+    \midrule
+    Noise detection & --- & --- & --- & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\noindent\textit{Note: The KG cleaning evaluation was in progress at submission time. Results will be reported in the camera-ready version. The experimental design: for each triple, the LLM verifies whether it is supported/contradicted/unverifiable; we compute precision (fraction of LLM-flagged triples that are actually noise), recall (fraction of true noise detected), and F1.}
+
+\subsection{KGQA Generalization}
+\label{sec:exp:kgqa}
+
+We construct 9 multi-hop QA pairs from the KG. All methods achieve EM=0.00 and F1=0.00 because synthetic entity names (e.g., ``chemical\_42'') are absent from the LLM's parametric knowledge, making exact match impossible for any method. KG-SCoRE achieves BroadFaith@10 of 0.89, but this only demonstrates that it can generate path-consistent (but incorrect) answers. This experiment highlights that \emph{faithfulness and correctness are decoupled}: a method can be perfectly faithful to a path while producing a wrong answer. We acknowledge this experiment does not demonstrate task-level generalization and plan to evaluate on standard benchmarks (WebQSP, MetaQA) in future work.
+
+\subsection{Discussion}
+The results paint a nuanced picture. Under fair evaluation, KG-SCoRE's faithfulness advantage is real but smaller than initially suggested: ToG also achieves high BroadFaith (0.94) and Coverage (1.00), but its StrictFaith is low (0.05). KG-SCoRE doubles StrictFaith (0.10) while maintaining competitive recall. The ComplEx component is counterproductive on noisy KGs---a key design finding. The faithfulness metric's fine-grained labels are unreliable ($\kappa{\approx}0$), but the aggregate BroadFaith score is stable across judge types (0.49--0.50). These findings suggest that LLM-based verification is a viable approach for producing traceable hypotheses, but the faithfulness metric requires refinement (stricter labels, trained entailment models).

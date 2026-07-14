@@ -1,0 +1,185 @@
+{
+  "_comment": "Expanded Swanson/Cameron LBD gold-standard pairs (20 pairs).",
+  "pairs": [
+    {
+      "id": "swanson-fish-oil-raynaud",
+      "source": "Raynaud disease",
+      "target": "fish oil",
+      "bridge": ["vasoconstriction", "platelet aggregation"],
+      "relation": "TREATS",
+      "reference": "Swanson 1986",
+      "domain": "biomedical"
+    },
+    {
+      "id": "swanson-magnesium-migraine",
+      "source": "migraine",
+      "target": "magnesium",
+      "bridge": ["vasoconstriction"],
+      "relation": "TREATS",
+      "reference": "Swanson 1988",
+      "domain": "biomedical"
+    },
+    {
+      "id": "swanson-estrogen-alzheimer",
+      "source": "Alzheimer disease",
+      "target": "estrogen",
+      "bridge": ["inflammation", "APOE"],
+      "relation": "TREATS",
+      "reference": "Smalheiser & Swanson 1996",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-depression-curcumin",
+      "source": "depression",
+      "target": "curcumin",
+      "bridge": ["inflammation", "BDNF"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-diabetes-curcumin",
+      "source": "diabetes",
+      "target": "curcumin",
+      "bridge": ["insulin resistance", "inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-asthma-vitamind",
+      "source": "asthma",
+      "target": "vitamin D",
+      "bridge": ["inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-psoriasis-vitamind",
+      "source": "psoriasis",
+      "target": "vitamin D",
+      "bridge": ["inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-hypertension-caffeine",
+      "source": "hypertension",
+      "target": "caffeine",
+      "bridge": ["ACE", "vasoconstriction"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-diabetes-metformin",
+      "source": "diabetes",
+      "target": "metformin",
+      "bridge": ["insulin resistance"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-depression-lithium",
+      "source": "depression",
+      "target": "lithium",
+      "bridge": ["serotonin", "neurogenesis"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-alzheimer-omega3",
+      "source": "Alzheimer disease",
+      "target": "omega-3",
+      "bridge": ["inflammation", "APOE"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-arthritis-aspirin",
+      "source": "arthritis",
+      "target": "aspirin",
+      "bridge": ["inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-cancer-aspirin",
+      "source": "cancer",
+      "target": "aspirin",
+      "bridge": ["inflammation", "apoptosis"],
+      "relation": "PREVENTS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-parkinson-caffeine",
+      "source": "Parkinson disease",
+      "target": "caffeine",
+      "bridge": ["neurogenesis", "inflammation"],
+      "relation": "PREVENTS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-diabetes-fish-oil",
+      "source": "diabetes",
+      "target": "fish oil",
+      "bridge": ["inflammation", "insulin resistance"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-depression-vitamind",
+      "source": "depression",
+      "target": "vitamin D",
+      "bridge": ["inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-hypertension-atorvastatin",
+      "source": "hypertension",
+      "target": "atorvastatin",
+      "bridge": ["inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-alzheimer-vitamine",
+      "source": "Alzheimer disease",
+      "target": "vitamin E",
+      "bridge": ["oxidative stress", "inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-arthritis-fish-oil",
+      "source": "arthritis",
+      "target": "fish oil",
+      "bridge": ["inflammation"],
+      "relation": "TREATS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    },
+    {
+      "id": "lbd-cancer-metformin",
+      "source": "cancer",
+      "target": "metformin",
+      "bridge": ["insulin resistance", "apoptosis"],
+      "relation": "PREVENTS",
+      "reference": "Extension pair",
+      "domain": "biomedical"
+    }
+  ]
+}

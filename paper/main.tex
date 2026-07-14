@@ -1,0 +1,64 @@
+%% KG-SCoRE: Knowledge-Graph-Symbolic Co-Refinement for Literature-Based Discovery
+%% SIGKDD 2027 Research Track — double-blind submission
+\documentclass[sigconf,anonymous,review]{acmart}
+
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{placeins}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\settopmatter{printacmref=false}
+\settopmatter{printfolios=true}
+
+\acmConference[SIGKDD Conference on Knowledge Discovery and Data Mining 2027]{KDD '27}{August 2027}{San Jose, CA, USA}
+\acmDOI{}
+\acmISBN{}
+
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10002951.10003260.10003261</concept_id>
+<concept_desc>Computing methodologies~Natural language processing</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10002951.10003260.10003261.10003262</concept_id>
+<concept_desc>Computing methodologies~Knowledge representation and reasoning</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10002951.10003260.10003261.10011140</concept_id>
+<concept_desc>Computing methodologies~Information extraction</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Computing methodologies~Natural language processing}
+\ccsdesc[500]{Computing methodologies~Knowledge representation and reasoning}
+\ccsdesc[300]{Computing methodologies~Information extraction}
+
+\begin{document}
+
+\title{KG-SCoRE: Knowledge-Graph-Symbolic Co-Refinement for Traceable Hypothesis Generation from Biomedical Literature}
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\maketitle
+
+\input{sections/introduction}
+\input{sections/related-work}
+\input{sections/method}
+\input{sections/experiments}
+\input{sections/conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+
+\end{document}
