@@ -73,25 +73,25 @@ Table~\ref{tab:main} reports LBD re-discovery and fair faithfulness on 20 pairs.
 Unlike our earlier evaluation (which assigned 0 to all baselines), the fair evaluation reveals that ToG achieves BroadFaith@10 of 0.94 and Coverage of 1.00---it does explore and output KG paths. However, ToG's \emph{strict} faithfulness is only 0.05, meaning most hypotheses are only partially supported by their paths. RoG shows a similar pattern: BroadFaith@10 of 0.99 and Coverage of 1.00, but StrictFaith@10 of only 0.04. KG-SCoRE achieves StrictFaith@10 of 0.10 (2.5$\times$ RoG's and 2$\times$ ToG's) while matching BroadFaith@10 of 0.99. Vanilla LLM has near-zero coverage (0.11), confirming it generates without KG grounding. BM25-RAG has moderate coverage (0.57) but near-zero faith, indicating retrieved text snippets rarely align with KG paths. The pattern across all KG-grounded methods is consistent: broad alignment with paths is easy, but strict entailment is rare---KG-SCoRE's verification step doubles the strict faithfulness rate.
 
 \paragraph{Finding 2: No significant recall difference from RoG.}
-On 20 pairs, RoG achieves the highest Hit@10 (0.40), with KG-SCoRE and Vanilla LLM tied at 0.25. On the 10-pair multi-seed subset (Table~\ref{tab:multiseed}), KG-SCoRE achieves 0.47$\pm$0.05 vs.\ RoG's 0.57$\pm$0.05. McNemar test shows no significant difference ($p{>}0.20$), indicating failure to detect a recall gap---not proof of equivalence.
+On 20 pairs, RoG achieves the highest Hit@10 (0.40), with KG-SCoRE and Vanilla LLM tied at 0.25. On the 20-pair multi-seed evaluation (Table~\ref{tab:multiseed}), KG-SCoRE achieves 0.35$\pm$0.00 vs.\ RoG's 0.38$\pm$0.02. McNemar test shows no significant difference ($p{=}0.83$), indicating failure to detect a recall gap---not proof of equivalence.
 
 \paragraph{Statistical significance.}
-McNemar tests on 10-pair multi-seed ($n{=}30$) confirm KG-SCoRE significantly outperforms Vanilla LLM ($p{<}0.01$), BM25-RAG ($p{<}0.05$), and ToG ($p{<}0.05$), but not RoG ($p{>}0.20$).
+McNemar tests on 20-pair multi-seed ($n{=}60$) confirm KG-SCoRE significantly outperforms Vanilla LLM ($p{<}0.0001$), BM25-RAG ($p{<}0.001$), and ToG ($p{<}0.05$), but not RoG ($p{=}0.83$).
 
 \begin{table}[tb]
   \centering
-  \caption{Multi-seed Hit@10 ($n=30$, 3 seeds $\times$ 10 pairs). Seeds vary LLM sampling randomness at fixed temperature 0.2.}
+  \caption{Multi-seed Hit@10 ($n=60$, 3 seeds $\times$ 20 pairs). Seeds vary LLM sampling randomness at fixed temperature 0.2.}
   \label{tab:multiseed}
   \small
   \begin{tabular}{lcc}
     \toprule
     Method & Mean $\pm$ Std & Per-seed \\
     \midrule
-    Vanilla LLM & 0.10 $\pm$ 0.14 & [0.00, 0.30, 0.00] \\
-    BM25-RAG & 0.17 $\pm$ 0.05 & [0.20, 0.20, 0.10] \\
-    ToG & 0.20 $\pm$ 0.00 & [0.20, 0.20, 0.20] \\
-    \textbf{RoG} & \textbf{0.57 $\pm$ 0.05} & [0.60, 0.60, 0.50] \\
-    \textbf{KG-SCoRE} & \textbf{0.47 $\pm$ 0.05} & [0.50, 0.40, 0.50] \\
+    Vanilla LLM & 0.05 $\pm$ 0.04 & [0.05, 0.00, 0.10] \\
+    BM25-RAG & 0.08 $\pm$ 0.02 & [0.10, 0.05, 0.10] \\
+    ToG & 0.15 $\pm$ 0.00 & [0.15, 0.15, 0.15] \\
+    \textbf{RoG} & \textbf{0.38 $\pm$ 0.02} & [0.40, 0.35, 0.40] \\
+    \textbf{KG-SCoRE} & \textbf{0.35 $\pm$ 0.00} & [0.35, 0.35, 0.35] \\
     \bottomrule
   \end{tabular}
 \end{table}
