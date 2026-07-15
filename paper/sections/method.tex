@@ -27,17 +27,17 @@ We may train a ComplEx~\cite{trouillon2016complex} embedding model on $\mathcal{
 trained with negative sampling and softplus loss. After training, every triple receives a score $s_i$; low scores flag potentially noisy triples. However, as our experiments show (Sec.~\ref{sec:exp:ablation}), when the KG-completion model has low MRR, this gating is counterproductive. In the primary configuration, \textbf{all} retrieved triples are verified by the LLM without ComplEx gating.
 
 \paragraph{LLM verification.}
-For each triple in the retrieved subgraph, we prompt the LLM with the triple and optional text context, asking it to output a verdict $v\in\{\textsc{supported},\textsc{contradicted},\textsc{unverifiable}\}$ and, if contradicted, a corrected object $\hat{t}$. The verified KG $\mathcal{G}'$ is:
+For each triple in the \emph{query-local} retrieved subgraph $\mathcal{S}(e_s)$ (not the global KG), we prompt the LLM with the triple and optional text context, asking it to output a verdict $v\in\{\textsc{supported},\textsc{contradicted},\textsc{unverifiable}\}$ and, if contradicted, a corrected object $\hat{t}$. The verified subgraph $\mathcal{S}'$ is:
 \begin{equation}
-  \mathcal{T}' = \{(h,r,t)\in\mathcal{T}\mid v_i=\textsc{supported}\}\;\cup\;\{(h,r,\hat{t})\mid v_i=\textsc{contradicted}\}.
+  \mathcal{S}' = \{(h,r,t)\in\mathcal{S}\mid v=\textsc{supported}\}\;\cup\;\{(h,r,\hat{t})\mid v=\textsc{contradicted}\}\;\cup\;\mathcal{U},
 \end{equation}
-Triples marked \textsc{unverifiable} or \textsc{contradicted} without a correction are deleted. This is the core of KG-SCoRE: the LLM cleans the KG it will later reason over.
+where $\mathcal{U}$ is the set of \textsc{unverifiable} triples. In the primary (conservative) mode, $\mathcal{U}$ is retained (only \textsc{contradicted}-without-correction triples are deleted), avoiding over-deletion; in the aggressive mode, $\mathcal{U}=\emptyset$. Verification is performed per query on the retrieved subgraph; corrections are not written back to the global KG, so this is a \emph{query-time} verification rather than a global KG rewrite. This distinction is reflected in our naming: \emph{query-time KG verification} rather than global co-refinement.
 
 \paragraph{Prompt design.}
 The verification prompt provides the LLM with the triple $(h, r, t)$, the entity types of $h$ and $t$ (e.g., disease, chemical, gene), and instructs it to: (i) assess whether the relation $r$ is semantically valid between entities of these types, (ii) check whether the direction is correct (e.g., \texttt{TREATS} should point from chemical to disease, not vice versa), and (iii) determine whether the claim is supported by biomedical knowledge. The prompt uses a structured output format requiring a JSON response with fields \texttt{verdict}, \texttt{corrected\_object} (if applicable), and \texttt{reasoning}. This structured format ensures parseable outputs and reduces hallucinated justifications. The generation prompt (Module~C) renders the verified subgraph as pipe-delimited triples and instructs the LLM to reason step-by-step, generating hypotheses with explicit \texttt{KG\_PATH} chains. The faithfulness prompt (Module~D) presents the hypothesis text and its KG path side-by-side, asking the LLM to classify entailment as \textsc{entailed}, \textsc{partial}, or \textsc{none} with justification.
 
 \paragraph{Complexity.}
-For each query, Module~A verifies $K$ triples (default $K{=}40$), requiring $K$ LLM calls. Module~C requires 1 LLM call for generation, and Module~D requires $K$ LLM calls for faithfulness checking. Total: $\sim$$2K{+}1$ LLM calls per query ($\sim$81 calls with $K{=}40$). At GPT-4o-mini pricing (\$0.15/M input tokens, \$0.60/M output tokens), the average cost per query is approximately \$0.03, making the pipeline practical for batch hypothesis generation.
+For each query, Module~A verifies $K{=}40$ retrieved triples ($K$ LLM calls). Module~C requires 1 LLM call to overgenerate $M{=}20$ candidate hypotheses. Module~D verifies each of the $M$ hypotheses for faithfulness ($M$ LLM calls). The total is $K{+}1{+}M = 40{+}1{+}20 = 61$ LLM calls per query. At GPT-4o-mini pricing (\$0.15/M input tokens, \$0.60/M output tokens), the average cost per query is approximately \$0.03, making the pipeline practical for batch hypothesis generation.
 
 \subsection{Module B: Symbolic Subgraph Retrieval}
 \label{sec:method:b}
@@ -88,7 +88,7 @@ Algorithm~\ref{alg:kgscore} summarizes the pipeline. ComplEx scoring (Line 1) is
 \caption{KG-SCoRE inference}
 \label{alg:kgscore}
 \begin{algorithmic}[1]
-\Require KG $\mathcal{G}$, question $q$, seed $e_s$, thresholds $K,L$
+\Require KG $\mathcal{G}$, question $q$, seed $e_s$, params $K,L,M$
 \Statex \textcolor{gray}{\textit{// Optional: ComplEx scoring (Module A)}}
 \If{ComplEx enabled}
   \State Train ComplEx on $\mathcal{T}$; compute scores $s_i$
@@ -96,10 +96,11 @@ Algorithm~\ref{alg:kgscore} summarizes the pipeline. ComplEx scoring (Line 1) is
 \Else
   \State $\mathcal{G}' \gets \mathcal{G}$
 \EndIf
-\State $\mathcal{S} \gets \mathrm{TopK}(\mathrm{BFS}_L(e_s;\, \mathcal{G}'))$ \Comment{Module B}
-\State Verify each triple in $\mathcal{S}$ via LLM \Comment{Module A (primary)}
-\State $\mathcal{H} \gets \mathrm{LLM\_Generate}(q, \mathcal{S})$ with paths $\{\pi_i\}$ \Comment{Module C}
-\State $f_i \gets \mathrm{LLM\_Judge}(h_i, \pi_i)$ for each $i$ \Comment{Module D}
-\State \Return ranked $\mathcal{H}$ with faithfulness labels $\{f_i\}$
+\State $\mathcal{S} \gets \mathrm{TopK}_K(\mathrm{BFS}_L(e_s;\, \mathcal{G}'))$ \Comment{Module B}
+\State $\mathcal{S}' \gets \mathrm{LLM\_Verify}(\mathcal{S})$ \Comment{Module A: clean subgraph}
+\State $\mathcal{H} \gets \mathrm{LLM\_Generate}(q, \mathcal{S}',\, M)$ with paths $\{\pi_i\}$ \Comment{Module C}
+\State $f_i \gets \mathrm{LLM\_Judge}(h_i, \pi_i)$ for each $h_i \in \mathcal{H}$ \Comment{Module D}
+\State $\mathcal{H} \gets \mathrm{RerankByFaithfulness}(\mathcal{H}, \{f_i\})$ \Comment{entailed $>$ partial $>$ none}
+\State \Return top-10 of $\mathcal{H}$ with faithfulness labels
 \end{algorithmic}
 \end{algorithm}

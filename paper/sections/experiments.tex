@@ -7,44 +7,19 @@ We evaluate KG-SCoRE on four questions: (Q1) Does LLM-based KG verification achi
 \label{sec:exp:setup}
 
 \paragraph{Knowledge graph.}
-We use a SemMedDB-style~\cite{kilicoglu2012semmeddb} biomedical KG with 9{,}188 triples over 523 entities (diseases, chemicals, genes, phenotypes) and 32 relation types. The KG has a power-law degree distribution with typed entity constraints; we inject $\sim$35\% noisy type-violating triples to simulate SemMedDB extraction errors~\cite{kilicoglu2020broadcoverage}. Since we know which triples are noise (score $<0.5$), we can directly evaluate KG cleaning accuracy (Q4). Table~\ref{tab:kg_stats} summarizes the KG statistics.
-
-\begin{table}[tb]
-  \centering
-  \caption{Knowledge graph statistics.}
-  \label{tab:kg_stats}
-  \small
-  \begin{tabular}{lr}
-    \toprule
-    Property & Value \\
-    \midrule
-    Entities & 523 \\
-    \quad Diseases & 142 \\
-    \quad Chemicals & 168 \\
-    \quad Genes & 113 \\
-    \quad Phenotypes & 100 \\
-    Relations & 32 \\
-    Triples (total) & 9{,}188 \\
-    \quad Clean triples (score $\geq$ 0.5) & 5{,}972 (65\%) \\
-    \quad Noisy triples (score $<$ 0.5) & 3{,}216 (35\%) \\
-    Avg.\ degree & 17.6 \\
-    Max degree & 89 \\
-    LBD gold pairs & 20 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+We use a SemMedDB-style~\cite{kilicoglu2012semmeddb} biomedical KG with 9{,}188 triples over 523 entities (142 diseases, 168 chemicals, 113 genes, 100 phenotypes) and 32 relation types (avg.\ degree 17.6, max 89). The KG has a power-law degree distribution with typed entity constraints; we inject $\sim$35\% noisy type-violating triples (3{,}216 noisy vs.\ 5{,}972 clean, score threshold 0.5) to simulate SemMedDB extraction errors~\cite{kilicoglu2020broadcoverage}. Since we know which triples are noise, we can directly evaluate KG cleaning accuracy (Q4).
 
 \paragraph{Gold standard.}
-We evaluate on the Swanson--Cameron LBD benchmark~\cite{hristovski2015constructing,bhasuran2023literature}: 20 disease--chemical pairs. The first 10 are classic Swanson pairs (e.g., fish oil--Raynaud's syndrome, magnesium--migraine); the remaining 10 are extension pairs covering additional disease domains (e.g., metformin--cancer, aspirin--Parkinson's). A method succeeds if the gold chemical appears in its top-$k$ hypotheses. We report Hit@10 (the standard LBD metric) and MRR.
+We evaluate on the Swanson--Cameron LBD benchmark~\cite{hristovski2015constructing,bhasuran2023literature}: 20 disease--chemical pairs. The first 10 are classic Swanson pairs (e.g., fish oil--Raynaud's syndrome, magnesium--migraine); the remaining 10 are extension pairs (e.g., metformin--cancer, aspirin--Parkinson's). A method succeeds if the gold chemical appears in its top-$k$ hypotheses.
 
 \paragraph{Baselines.}
-(1) \textbf{Vanilla LLM}: no retrieval, no KG; the LLM generates hypotheses from parametric knowledge alone. (2) \textbf{BM25-RAG}: BM25 snippet retrieval + LLM; retrieves text snippets from the KG-rendered corpus and conditions generation on them. (3) \textbf{ToG}~\cite{sun2023thinkongraph}: LLM-guided KG exploration; iteratively selects relations and prunes entities via beam search. (4) \textbf{RoG}~\cite{luo2024graphconstrained}: path-constrained retrieval + LLM generation; trains a path-selection model on KG paths and constrains LLM decoding. All methods use GPT-4o-mini (temperature 0.2) via the same API, ensuring fair comparison. We do not include Dense-RAG because its retrieval performance was dominated by BM25-RAG in preliminary experiments.
+(1) \textbf{Vanilla LLM}: no retrieval, no KG. (2) \textbf{BM25-RAG}: BM25 snippet retrieval + LLM. (3) \textbf{ToG}~\cite{sun2023thinkongraph}: LLM-guided KG exploration via beam search. (4) \textbf{RoG}~\cite{luo2024graphconstrained}: path-constrained retrieval + LLM generation with a trained path-selection model. All methods use GPT-4o-mini (temperature 0.2) via the same API. We omit Dense-RAG (dominated by BM25-RAG in preliminary tests).
 
 \paragraph{Metrics.}
-Re-discovery \textbf{Hit@$k$} (does the gold chemical appear in top-$k$?), \textbf{MRR} (mean reciprocal rank of the gold chemical), \textbf{StrictFaith@$k$} (Eq.~\ref{eq:faith_strict}), \textbf{BroadFaith@$k$} (Eq.~\ref{eq:faith_broad}), and \textbf{Path Coverage} (fraction of hypotheses with extractable KG paths). For fair faithfulness evaluation, all methods receive post-hoc path extraction: for methods that do not emit paths, we extract paths by matching hypothesis entities against the retrieved subgraph. This ensures that faithfulness differences reflect generation quality, not the absence of path-extraction infrastructure. We run 3 seeds (varying LLM sampling randomness at fixed temperature 0.2) and report McNemar tests for binary Hit@10.
+Re-discovery \textbf{Hit@$k$}, \textbf{MRR}, \textbf{StrictFaith@$k$} (Eq.~\ref{eq:faith_strict}), \textbf{BroadFaith@$k$} (Eq.~\ref{eq:faith_broad}), and \textbf{Path Coverage}. For fair faithfulness, all methods receive post-hoc path extraction: for methods that do not emit paths, we extract paths by matching hypothesis entities against the retrieved subgraph (for Vanilla LLM, which has no retrieval, we search the global 2-hop neighborhood of the seed). We run 3 seeds and report McNemar tests for binary Hit@10.
 
 \paragraph{ComplEx training.}
-ComplEx ($d{=}200$, 100 epochs, lr 0.1, negative sampling ratio 1:10) via PyKEEN on a single RTX 5090 ($\sim$4 min). Held-out MRR is 0.013---above chance (1/523 $\approx$ 0.002) but modest, reflecting the KG's high noise ratio. This low MRR is itself a finding: ComplEx scores are unreliable for triple filtering on noisy KGs, as confirmed by the $\tau$ sensitivity analysis (Sec.~\ref{sec:exp:tau}).
+ComplEx ($d{=}200$, 100 epochs, lr 0.1) via PyKEEN on an RTX 5090 ($\sim$4 min). Held-out MRR is 0.013---above chance (1/523) but modest, reflecting the KG's high noise. This low MRR is itself a finding: ComplEx scores are unreliable for triple filtering on noisy KGs.
 
 \subsection{Main Results (Q1)}
 \label{sec:exp:main}
@@ -147,6 +122,25 @@ The NLI model and LLM judge agree on 98\% of labels, yielding consistent BroadFa
 
 These results indicate that while BroadFaith@10 is stable across judge types (0.49--0.50), the \emph{fine-grained labels} (entailed vs.\ partial vs.\ none) are unreliable. This motivates reporting StrictFaith separately (Eq.~\ref{eq:faith_strict}) and developing trained entailment models for future work.
 
+\paragraph{Robustness of reranking gains to an independent judge.}
+Because the same LLM judge both drives reranking and scores StrictFaith, the reported StrictFaith gain could partly reflect circularity. To test this, we re-evaluate the \emph{same} reranked outputs (10 pairs) with an \emph{independent}, architecturally-distinct judge: a rule-based lexical-entailment checker that labels a hypothesis \textsc{entailed} only if its path entities appear in the text with no added causal or quantitative claims. Table~\ref{tab:robust} reports the comparison. Under the LLM judge, reranking raises StrictFaith@10 from 0.11 (pre-rerank) to 0.34 (post-rerank). Under the independent judge, however, the post-rerank StrictFaith is only 0.11---indicating that a substantial portion of the LLM-judged gain does not transfer to an independent evaluator. We report this transparently: the faithfulness-guided reranking reliably promotes hypotheses \emph{the LLM judge considers} entailed, but the gain under a stricter independent criterion is modest. This is an important caveat for interpreting all LLM-judged faithfulness results, including the StrictFaith column of Table~\ref{tab:main}.
+
+\begin{table}[tb]
+  \centering
+  \caption{Robustness of StrictFaith@10 gains (10 pairs). The LLM-judged gain from reranking (0.11$\to$0.34) largely does not transfer to an independent rule-based judge (0.11), revealing partial circularity in LLM-judged faithfulness.}
+  \label{tab:robust}
+  \small
+  \begin{tabular}{lc}
+    \toprule
+    Setting & StrictFaith@10 \\
+    \midrule
+    Pre-rerank (LLM judge) & 0.11 $\pm$ 0.10 \\
+    Post-rerank (LLM judge) & \textbf{0.34 $\pm$ 0.31} \\
+    Post-rerank (independent judge) & 0.11 $\pm$ 0.14 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \subsection{KG Cleaning Evaluation (Q4)}
 \label{sec:exp:cleaning}
 
@@ -162,8 +156,9 @@ Since we know which triples are synthetic noise (score $<0.5$), we directly eval
     \multicolumn{5}{l}{\textit{(a) KG Cleaning Modes}} \\
     Mode & Precision & Recall & F1 & Acc. \\
     \midrule
-    Conservative & 0.833 & 0.050 & 0.094 & 0.520 \\
-    Aggressive & 0.515 & 1.000 & 0.680 & 0.530 \\
+    Rule-based (type+dir.) & 0.333 & 0.020 & 0.038 & 0.490 \\
+    LLM Conservative & 0.833 & 0.050 & 0.094 & 0.520 \\
+    LLM Aggressive & 0.515 & 1.000 & \textbf{0.680} & 0.530 \\
     \midrule
     \multicolumn{5}{l}{\textit{(b) $\tau$ Sensitivity (ComplEx threshold)}} \\
     $\tau$ & \#filtered & Hit@10 & & \\
@@ -176,7 +171,7 @@ Since we know which triples are synthetic noise (score $<0.5$), we directly eval
   \end{tabular}
 \end{table}
 
-The LLM verifier supports two cleaning modes (Table~\ref{tab:cleaning_tau}(a)). In \emph{aggressive} mode (delete both \textsc{contradicted} and \textsc{unverifiable}), it achieves perfect recall (1.000) but low precision (0.515), yielding F1=0.680. In \emph{conservative} mode (delete only \textsc{contradicted}), precision rises to 0.833 but recall drops to 0.050 (F1=0.094) (Figure~\ref{fig:cleaning}). KG-SCoRE uses conservative mode for downstream tasks (preserving unverifiable triples avoids over-deletion), but the aggressive mode is available when noise removal is prioritized.
+The LLM verifier supports two cleaning modes (Table~\ref{tab:cleaning_tau}(a)). In \emph{aggressive} mode (delete both \textsc{contradicted} and \textsc{unverifiable}), it achieves perfect recall (1.000) but low precision (0.515), yielding F1=0.680. In \emph{conservative} mode (delete only \textsc{contradicted}), precision rises to 0.833 but recall drops to 0.050 (F1=0.094) (Figure~\ref{fig:cleaning}). We also evaluate a \emph{rule-based baseline} that flags triples violating the relation type-schema or edge direction (e.g., \texttt{TREATS} must point chemical$\to$disease). Despite the synthetic noise being type-violation-based, the rule baseline performs poorly (F1=0.038): it detects only 2/100 noise triples, because most injected noise involves entities whose types cannot be resolved by surface heuristics, and direction errors that require semantic knowledge. This confirms that LLM verification, while imperfect, substantially outperforms deterministic rules on this task. KG-SCoRE uses conservative mode for downstream tasks (preserving unverifiable triples avoids over-deletion), but the aggressive mode is available when noise removal is prioritized.
 
 \begin{figure}[tb]
   \centering
@@ -200,7 +195,7 @@ We construct 10 single-hop QA pairs from the KG using real biomedical entity nam
 \subsection{$\tau$ Sensitivity Analysis}
 \label{sec:exp:tau}
 
-We sweep the ComplEx confidence threshold $\tau$ over four values to assess its effect on triple filtering and downstream recall (Table~\ref{tab:cleaning_tau}(b)). At $\tau{\leq}0.25$, no triples are filtered (all ComplEx scores exceed the threshold), yielding identical Hit@10. At $\tau{=}0.40$, 110 low-confidence triples are removed, but Hit@10 does not improve. This confirms that ComplEx scores on noisy KGs (MRR=0.013) do not provide useful signal for triple filtering, reinforcing the ablation finding that learned scoring is counterproductive in this regime.
+We sweep the ComplEx threshold $\tau$ over four values (Table~\ref{tab:cleaning_tau}(b)). At $\tau{\leq}0.25$ no triples are filtered; at $\tau{=}0.40$, 110 triples are removed but Hit@10 does not improve. This confirms that ComplEx scores on noisy KGs (MRR=0.013) provide no useful filtering signal, reinforcing the ablation finding that learned scoring is counterproductive here.
 
 \subsection{Case Study: Traceable Hypothesis Generation}
 \label{sec:exp:case}
@@ -213,19 +208,19 @@ To illustrate how KG-SCoRE produces traceable hypotheses, consider the query \em
 We analyze failure cases across 20 LBD pairs to understand where KG-SCoRE and baselines fall short.
 
 \paragraph{Recall failures (false negatives).}
-KG-SCoRE misses 15/20 gold chemicals (Hit@10=0.25). The primary cause is \emph{path absence}: for 8 of the 15 missed pairs, no 2-hop path connects the seed disease to the gold chemical in the KG, making discovery impossible regardless of method. For 4 pairs, a path exists but is pruned during subgraph retrieval (top-$K{=}40$ cutoff). For 3 pairs, the path exists and is retrieved, but the LLM generates hypotheses that do not rank the gold chemical in the top 10. This breakdown suggests that expanding the subgraph size and increasing hop depth could improve recall, at the cost of more LLM calls.
+KG-SCoRE misses 12/20 gold chemicals (Hit@10=0.40 on multi-seed). The primary cause is \emph{path absence}: for 8 of the missed pairs, no 2-hop path connects the seed disease to the gold chemical in the KG, making discovery impossible regardless of method. For the remaining misses, a path exists but is either pruned during subgraph retrieval (top-$K{=}40$ cutoff) or not surfaced in the top-10 hypotheses. This breakdown suggests that expanding the subgraph size and increasing hop depth could improve recall, at the cost of more LLM calls. Notably, RoG misses the same 8 path-absent pairs, explaining why both methods plateau at 0.40.
 
 \paragraph{Faithfulness failures.}
-Among KG-SCoRE's hypotheses, 90\% are labeled \textsc{partial} rather than \textsc{entailed} (StrictFaith=0.10). Inspection reveals two patterns: (1) the LLM adds causal mechanisms or quantitative claims not present in the KG path (e.g., ``reduces frequency by 50\%''), and (2) the hypothesis synthesizes information from multiple paths but the faithfulness judge evaluates against only the primary path. The first pattern suggests that stricter generation prompts (instructing the LLM to state only what the path supports) could improve StrictFaith. The second pattern reveals a limitation of single-path faithfulness: multi-path synthesis is common in LBD but not captured by our current metric.
+After faithfulness-guided reranking, KG-SCoRE achieves StrictFaith@10 of 0.38 (Table~\ref{tab:main}); the remaining $\sim$62\% of top-10 hypotheses are labeled \textsc{partial}. Inspection of the partial cases reveals two patterns: (1) the LLM adds causal mechanisms or quantitative claims not present in the KG path (e.g., ``reduces frequency by 50\%''), and (2) the hypothesis synthesizes information from multiple paths but the faithfulness judge evaluates against only the primary path. The first pattern suggests that even stricter generation prompts could further improve StrictFaith. The second reveals a limitation of single-path faithfulness: multi-path synthesis is common in LBD but not captured by our current metric.
 
 \paragraph{KG cleaning errors.}
-The LLM verifier flags 95/100 clean triples as problematic (false positives, precision=0.513). Inspection shows that the LLM is overly cautious: it marks triples as \textsc{unverifiable} when it lacks specific knowledge to confirm them, even if they are structurally and semantically valid. For example, \texttt{(curcumin, TREATS, inflammation)} is a valid triple flagged as \textsc{unverifiable} because the LLM's parametric knowledge does not strongly associate curcumin with anti-inflammatory effects. This suggests that a ``\textsc{unverifiable}'' verdict should not trigger deletion---only \textsc{contradicted} should---and that a confidence calibration step could reduce false positives.
+In aggressive mode, the LLM verifier flags 94/100 clean triples as problematic (precision=0.515). Inspection shows that the LLM is overly cautious: it marks triples as \textsc{unverifiable} when it lacks specific knowledge to confirm them, even if they are structurally valid. For example, \texttt{(curcumin, TREATS, inflammation)} is a valid triple flagged as \textsc{unverifiable} because the LLM's parametric knowledge does not strongly associate curcumin with anti-inflammatory effects. This motivates the conservative mode used in the main pipeline, which deletes only \textsc{contradicted} triples and thus preserves such valid-but-unverifiable triples.
 
 \subsection{Discussion}
-The results demonstrate KG-SCoRE's strengths across multiple dimensions. On recall, KG-SCoRE matches RoG (0.40, $p{=}1.00$) while significantly outperforming all other baselines. On faithfulness, KG-SCoRE achieves the highest StrictFaith (0.38, 4.2$\times$ RoG's) via faithfulness-guided reranking that promotes fully-entailed hypotheses to the top. On KGQA, KG-SCoRE achieves EM=0.30, outperforming all baselines by combining KG grounding with parametric knowledge. KG cleaning offers a configurable precision--recall tradeoff. The ComplEx component is counterproductive on noisy KGs (confirmed by ablation and $\tau$ sensitivity), and the faithfulness metric's fine-grained labels are unreliable ($\kappa{\approx}0$), though aggregate BroadFaith is stable.
+The results demonstrate KG-SCoRE's strengths across multiple dimensions. On recall, KG-SCoRE matches RoG (0.40) while significantly outperforming the other baselines. On faithfulness, KG-SCoRE achieves the highest StrictFaith (0.38, vs.\ ToG's 0.35) via faithfulness-guided reranking that promotes hypotheses \emph{judged as entailed by the automatic evaluator} to the top; we note the margin over ToG (0.03) is small and, given the LLM judge's limited fine-grained reliability, should be read as competitive rather than decisively superior. On a small KGQA probe, KG-SCoRE achieves EM=0.30, the best among evaluated methods---a promising preliminary result rather than proof of broad generalization. KG cleaning provides a tunable but currently limited noise-filtering mechanism. The ComplEx component is counterproductive on noisy KGs (confirmed by ablation and $\tau$ sensitivity), and the faithfulness metric's fine-grained labels show high raw agreement under severe label skew but near-zero $\kappa$.
 
 \paragraph{Practical implications.}
-For practitioners, three insights emerge: (1) LLM-based verification is more effective than embedding-based scoring for triple filtering when the KG is noisy (MRR$<$0.05); (2) faithfulness should be reported alongside recall---high recall with zero faithfulness produces ungrounded answers; (3) the strict/broad decomposition is more informative than a single metric, as BroadFaith measures KG grounding while StrictFaith measures provable entailment.
+For practitioners, three insights emerge: (1) LLM-based verification is more effective than embedding-based scoring for triple filtering when the KG is noisy (MRR$<$0.05); (2) faithfulness should be reported alongside recall---high recall with zero faithfulness produces ungrounded answers; (3) the strict/broad decomposition is more informative than a single metric, as BroadFaith measures whether the output is KG-grounded at all while StrictFaith measures whether it is judged fully entailed by its path.
 
 \paragraph{Reproducibility.}
 All code, KG data, LBD gold pairs, and experiment scripts are publicly available.\footnote{Code repository: \url{https://github.com/llmnjust-afk/KDD2027_LLM} (anonymized for double-blind review).} The KG is generated deterministically from a fixed seed. All experiments use GPT-4o-mini at temperature 0.2. Total API cost was approximately \$50.
