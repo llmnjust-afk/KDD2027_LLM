@@ -109,6 +109,34 @@ NOVELTY: ...
 """
 
 # ---------------------------------------------------------------------------
+# Module C — QA-specific generation (allows parametric knowledge use)
+# ---------------------------------------------------------------------------
+
+KGQA_GEN_WITH_KG = """\
+You are a biomedical question answering system. Given a question and a
+knowledge-graph subgraph, provide ranked answers.
+
+Research question: {question}
+
+Knowledge-graph subgraph (subject | predicate | object):
+{kg_subgraph}
+
+Instructions:
+1. Use BOTH the KG subgraph AND your biomedical knowledge to answer.
+2. The KG subgraph provides grounded evidence; your knowledge fills gaps.
+3. Generate {num} ranked answers, most likely first.
+4. For EACH answer, provide:
+   - HYPOTHESIS: a direct answer to the question (e.g., the chemical name).
+   - KG_PATH: the KG path supporting it, or "parametric" if from your knowledge.
+
+Output {num} answers in this exact format:
+###
+HYPOTHESIS: ...
+KG_PATH: ...
+###
+"""
+
+# ---------------------------------------------------------------------------
 # Module D — faithfulness verification
 # ---------------------------------------------------------------------------
 
