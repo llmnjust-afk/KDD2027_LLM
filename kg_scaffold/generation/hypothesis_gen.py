@@ -84,7 +84,7 @@ def generate_hypotheses(
         )
 
     try:
-        raw = client.complete(prompt, temperature=0.4,
+        raw = client.complete(prompt, temperature=0.2,
                               max_tokens=min(2048, 256 * num))
     except Exception as exc:
         logger.error("hypothesis generation failed: %s", exc)

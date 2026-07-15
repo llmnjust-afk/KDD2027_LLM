@@ -79,6 +79,10 @@ Instructions:
    - KG_PATH: the chain of triples (A|r1->B|r2->C) that supports it.
    - NOVELTY: why this link is not already in the provided literature.
 4. Each hypothesis MUST be traceable to the KG path above it.
+5. CRITICAL: Only state claims that are DIRECTLY supported by the KG path.
+   Do NOT add causal mechanisms, quantitative claims, dosages, percentages,
+   or any information not present in the KG path. The hypothesis should be
+   a faithful restatement of what the path implies.
 
 Output {num} hypotheses in this exact format:
 ###

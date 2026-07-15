@@ -43,7 +43,8 @@ def co_refine(triples: Sequence[Triple],
               completion: CompletionResult,
               client: LLMClient | None = None,
               min_confidence: float = 0.15,
-              context_provider=None) -> tuple[list[Triple], RefinementStats]:
+              context_provider=None,
+              strict_delete: bool = True) -> tuple[list[Triple], RefinementStats]:
     """Run the neural-symbolic co-refinement loop.
 
     Args:
@@ -53,6 +54,8 @@ def co_refine(triples: Sequence[Triple],
         min_confidence: triples below this score are LLM-verified.
         context_provider: optional callable(triple)->str returning context text
             (e.g. PubMed snippets) to help the LLM judge.
+        strict_delete: if True, only delete "contradicted" triples (keep
+            "unverifiable"). If False, delete both (original behavior).
 
     Returns:
         (refined_triples, stats)
@@ -66,14 +69,12 @@ def co_refine(triples: Sequence[Triple],
 
     for t in scored:
         if is_negative(t.predicate):
-            # drop explicit negations from the active KG
             stats.deleted += 1
             continue
         if t.score >= min_confidence:
             kept.append(t)
             stats.kept += 1
             continue
-        # low-confidence -> LLM verify
         stats.verified_by_llm += 1
         verdict, corrected = _verify_triple(t, client, context_provider)
         if verdict == "supported":
@@ -83,6 +84,11 @@ def co_refine(triples: Sequence[Triple],
             kept.append(Triple(t.subject, t.predicate, corrected,
                                t.subject_cui, t.object_cui, score=t.score))
             stats.corrected += 1
+        elif verdict == "contradicted":
+            stats.deleted += 1
+        elif strict_delete:
+            kept.append(t)
+            stats.kept += 1
         else:
             stats.deleted += 1
 
