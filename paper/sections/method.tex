@@ -33,8 +33,11 @@ For each triple in the retrieved subgraph, we prompt the LLM with the triple and
 \end{equation}
 Triples marked \textsc{unverifiable} or \textsc{contradicted} without a correction are deleted. This is the core of KG-SCoRE: the LLM cleans the KG it will later reason over.
 
+\paragraph{Prompt design.}
+The verification prompt provides the LLM with the triple $(h, r, t)$, the entity types of $h$ and $t$ (e.g., disease, chemical, gene), and instructs it to: (i) assess whether the relation $r$ is semantically valid between entities of these types, (ii) check whether the direction is correct (e.g., \texttt{TREATS} should point from chemical to disease, not vice versa), and (iii) determine whether the claim is supported by biomedical knowledge. The prompt uses a structured output format requiring a JSON response with fields \texttt{verdict}, \texttt{corrected\_object} (if applicable), and \texttt{reasoning}. This structured format ensures parseable outputs and reduces hallucinated justifications. The generation prompt (Module~C) renders the verified subgraph as pipe-delimited triples and instructs the LLM to reason step-by-step, generating hypotheses with explicit \texttt{KG\_PATH} chains. The faithfulness prompt (Module~D) presents the hypothesis text and its KG path side-by-side, asking the LLM to classify entailment as \textsc{entailed}, \textsc{partial}, or \textsc{none} with justification.
+
 \paragraph{Complexity.}
-For each query, Module~A verifies $K$ triples (default $K{=}40$), requiring $K$ LLM calls. Module~C requires 1 LLM call for generation, and Module~D requires $K$ LLM calls for faithfulness checking. Total: $\sim$$2K{+}1$ LLM calls per query ($\sim$81 calls with $K{=}40$).
+For each query, Module~A verifies $K$ triples (default $K{=}40$), requiring $K$ LLM calls. Module~C requires 1 LLM call for generation, and Module~D requires $K$ LLM calls for faithfulness checking. Total: $\sim$$2K{+}1$ LLM calls per query ($\sim$81 calls with $K{=}40$). At GPT-4o-mini pricing (\$0.15/M input tokens, \$0.60/M output tokens), the average cost per query is approximately \$0.03, making the pipeline practical for batch hypothesis generation.
 
 \subsection{Module B: Symbolic Subgraph Retrieval}
 \label{sec:method:b}
@@ -65,6 +68,12 @@ For each hypothesis $h_i$ with path $\pi_i$, we prompt the LLM (as a strict judg
 StrictFaith counts only fully entailed hypotheses; BroadFaith also counts partial support. We additionally report \emph{path coverage}: the fraction of hypotheses for which a KG path can be extracted. This decomposition addresses the concern that counting ``partial'' as faithful may overstate grounding.
 
 Unlike text-overlap faithfulness metrics used in RAG~\cite{brown2025systematic}, our metric verifies entailment against structured symbolic paths. While RoG~\cite{luo2024graphconstrained} constrains generation to KG-grounded paths during decoding, it does not post-hoc verify whether the final output is entailed by a specific path; KG-SCoRE adds this verification step.
+
+\paragraph{Entailment classification criteria.}
+The LLM judge applies three criteria: (1) \textsc{entailed} requires that every claim in $h_i$ is directly supported by $\pi_i$---no additional information is introduced; (2) \textsc{partial} requires that the core claim (the source--target link) follows from $\pi_i$, but the hypothesis may add explanatory mechanisms, causal claims, or quantitative details not present in the path; (3) \textsc{none} means the hypothesis contradicts $\pi_i$ or introduces a claim with no path support. This three-level scheme captures a meaningful distinction: \textsc{entailed} hypotheses are fully auditable, while \textsc{partial} hypotheses require human review of the additional claims. As our experiments show (Sec.~\ref{sec:exp:faith}), the boundary between \textsc{entailed} and \textsc{partial} is sensitive to judge design ($\kappa{\approx}0$), motivating the dual-metric reporting.
+
+\paragraph{Formal novelty definition.}
+A hypothesis $h_i$ with target entity $e_t$ is \emph{novel} if the direct triple $(e_s, r^*, e_t) \notin \mathcal{T}$ for any relation $r^* \in \mathcal{R}$. That is, the gold answer is not directly stated in the KG, though a multi-hop path $e_s \xrightarrow{r_1} \cdots \xrightarrow{r_m} e_t$ may exist. This definition aligns with the LBD task: the goal is to discover connections not explicitly recorded, even if indirect evidence chains exist. In practice, we enforce novelty by filtering out hypotheses whose target entity has a direct edge from $e_s$ in $\mathcal{T}$.
 
 \subsection{Full Pipeline and Ablation Configurations}
 Algorithm~\ref{alg:kgscore} summarizes the pipeline. ComplEx scoring (Line 1) is \emph{optional}; the primary configuration skips it and verifies all retrieved triples. Ablation configurations: \texttt{raw\_kg} (no verification), \texttt{+llm} (LLM verification, no faithfulness check), \texttt{+llm+faith} (LLM verification + faithfulness, no ComplEx — the primary mode), \texttt{+learned} (ComplEx scoring only), \texttt{full} (all modules including ComplEx), \texttt{no\_kg} (KG scaffold off), \texttt{no\_faith} (Module~D off).
