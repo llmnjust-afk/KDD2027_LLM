@@ -28,40 +28,40 @@ Table~\ref{tab:main} reports the comprehensive comparison across all evaluation 
 
 \begin{table*}[tb]
   \centering
-  \caption{Comprehensive results on 9{,}188-triple biomedical KG. Hit@10 from multi-seed ($n{=}60$, 3 seeds $\times$ 20 pairs); faithfulness from fair evaluation (10 pairs, post-hoc path extraction); KGQA from 10 single-hop questions. McNemar $p$-values test KG-SCoRE vs.\ each baseline on binary Hit@10 ($n{=}60$). Best in \textbf{bold}; $\dagger$ indicates $p{<}0.05$ (significant).}
+  \caption{Comprehensive results on 9{,}188-triple biomedical KG. Hit@10 from multi-seed (3 seeds $\times$ 20 pairs); StrictFaith reported as mean$\pm$std over 3 seeds; faithfulness from fair evaluation (10 pairs, post-hoc path extraction); KGQA from 10 single-hop questions. The $p$-column reports a query-level paired permutation test ($n{=}20$ queries) of KG-SCoRE vs.\ each baseline on Hit@10. Best in \textbf{bold}; $\dagger$ indicates $p{<}0.05$.}
   \label{tab:main}
   \small
   \begin{tabular}{lcccccccc}
     \toprule
-    Method & Hit@10 ($n{=}60$) & Per-seed & StrictFaith@10 & BroadFaith@10 & Coverage & KGQA EM & McNemar $p$ & Sig. \\
+    Method & Hit@10 & Per-seed & StrictFaith@10 & BroadFaith@10 & Coverage & KGQA EM & query-$p$ & Sig. \\
     \midrule
-    Vanilla LLM & 0.05 $\pm$ 0.04 & [0.10, 0.05, 0.00] & 0.00 & 0.00 & 0.00 & 0.10 & $<$0.0001 & $\dagger$ \\
-    BM25-RAG & 0.08 $\pm$ 0.02 & [0.10, 0.10, 0.05] & 0.00 & 0.20 & 0.58 & --- & $<$0.0001 & $\dagger$ \\
-    ToG~\cite{sun2023thinkongraph} & 0.13 $\pm$ 0.02 & [0.15, 0.15, 0.10] & 0.35 & \textbf{1.00} & \textbf{1.00} & 0.00 & 0.0015 & $\dagger$ \\
+    Vanilla LLM & 0.05 $\pm$ 0.04 & [0.10, 0.05, 0.00] & 0.00 & 0.00 & 0.00 & 0.10 & 0.005 & $\dagger$ \\
+    BM25-RAG & 0.08 $\pm$ 0.02 & [0.10, 0.10, 0.05] & 0.00 & 0.20 & 0.58 & --- & 0.012 & $\dagger$ \\
+    ToG~\cite{sun2023thinkongraph} & 0.13 $\pm$ 0.02 & [0.15, 0.15, 0.10] & 0.35 & \textbf{1.00} & \textbf{1.00} & 0.00 & 0.058 & --- \\
     RoG~\cite{luo2024graphconstrained} & \textbf{0.40} $\pm$ 0.00 & [0.40, 0.40, 0.40] & 0.09 & \textbf{1.00} & \textbf{1.00} & 0.00 & 1.00 & --- \\
-    \textbf{KG-SCoRE (ours)} & \textbf{0.40} $\pm$ 0.00 & [0.40, 0.40, 0.40] & \textbf{0.38} & \textbf{1.00} & \textbf{1.00} & \textbf{0.30} & --- & --- \\
+    \textbf{KG-SCoRE (ours)} & \textbf{0.40} $\pm$ 0.00 & [0.40, 0.40, 0.40] & \textbf{0.36 $\pm$ 0.05} & \textbf{1.00} & \textbf{1.00} & \textbf{0.30} & --- & --- \\
     \bottomrule
   \end{tabular}
 \end{table*}
 
 \paragraph{Finding 1: KG-SCoRE achieves the highest strict faithfulness.}
-Under fair evaluation, ToG and RoG both achieve high BroadFaith (1.00) and Coverage (1.00), but their StrictFaith is low (0.35 and 0.09 respectively). KG-SCoRE achieves the highest StrictFaith@10 of 0.38---4.2$\times$ RoG's and slightly above ToG's---while matching BroadFaith and Coverage at 1.00 (Figure~\ref{fig:faith}). This is because faithfulness-guided reranking promotes fully-entailed hypotheses to the top-$k$. Vanilla LLM and BM25-RAG have near-zero faithfulness, confirming they generate without KG grounding. The pattern is consistent: broad alignment with paths is achievable by all KG-grounded methods, but strict entailment requires the verification-and-reranking loop that only KG-SCoRE performs.
+Under fair evaluation, ToG and RoG both achieve high BroadFaith (1.00) and Coverage (1.00), but their StrictFaith is lower (0.35 and 0.09 respectively). KG-SCoRE achieves the highest StrictFaith@10 at 0.36$\pm$0.05 (Figure~\ref{fig:faith}), driven by faithfulness-guided reranking that promotes entailed-labeled hypotheses to the top-$k$. The margin over ToG (0.36 vs.\ 0.35) is within one standard deviation and should be read as \emph{on par with the strongest baseline}, not a decisive gap; the clearer separation is over RoG (4$\times$) and the non-KG baselines (near zero). We further caution (Table~\ref{tab:robust}) that this gain is partly judge-dependent.
 
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.95\linewidth]{figures/faithfulness_comparison.pdf}
-  \caption{Fair faithfulness comparison (10 pairs, post-hoc path extraction). KG-SCoRE achieves the highest StrictFaith@10 (0.38), while all KG-grounded methods achieve BroadFaith and Coverage near 1.00.}
+  \caption{Fair faithfulness comparison (10 pairs, post-hoc path extraction). KG-SCoRE and ToG lead on StrictFaith@10; all KG-grounded methods achieve BroadFaith and Coverage near 1.00.}
   \label{fig:faith}
 \end{figure}
 
 \paragraph{Finding 2: Competitive recall with RoG.}
-On the 20-pair multi-seed evaluation, KG-SCoRE achieves 0.40$\pm$0.00, matching RoG's 0.40$\pm$0.00. McNemar test confirms no significant difference ($p{=}1.00$). KG-SCoRE significantly outperforms all other baselines (Vanilla LLM $p{<}0.0001$, BM25-RAG $p{<}0.0001$, ToG $p{<}0.001$).
+On the 20-pair multi-seed evaluation, KG-SCoRE achieves 0.40$\pm$0.00, matching RoG's 0.40$\pm$0.00 (query-level $p{=}1.00$). KG-SCoRE significantly outperforms Vanilla LLM ($p{=}0.005$) and BM25-RAG ($p{=}0.012$); the advantage over ToG is suggestive but not significant ($p{=}0.058$).
 
-\paragraph{Finding 3: Superior KGQA generalization.}
-On KGQA, KG-SCoRE achieves EM=0.30, outperforming all baselines (Vanilla 0.10, ToG/RoG 0.00). This demonstrates that KG-SCoRE's architecture---combining KG verification, parametric knowledge, and faithfulness reranking---generalizes beyond LBD to QA tasks.
+\paragraph{Finding 3: Promising KGQA result.}
+On a small KGQA probe, KG-SCoRE achieves EM=0.30, the best among evaluated methods (Vanilla 0.10, ToG/RoG 0.00). This is a promising preliminary indication that KG-SCoRE's architecture---combining KG verification, parametric knowledge, and faithfulness reranking---transfers beyond LBD, though the probe is too small (10 questions) to establish broad generalization.
 
 \paragraph{Statistical significance.}
-McNemar tests on 20-pair multi-seed ($n{=}60$) confirm KG-SCoRE significantly outperforms Vanilla LLM ($p{<}0.0001$), BM25-RAG ($p{<}0.0001$), and ToG ($p{<}0.001$), and matches RoG ($p{=}1.00$).
+To avoid pseudo-replication (treating 3 seeds $\times$ 20 pairs as 60 independent samples), we aggregate the 3 seeds within each of the 20 queries and run a query-level paired permutation test ($n{=}20$ independent queries, 10{,}000 permutations). KG-SCoRE significantly outperforms Vanilla LLM ($p{=}0.005$) and BM25-RAG ($p{=}0.012$); the advantage over ToG is suggestive but not significant at this conservative level ($p{=}0.058$), and KG-SCoRE ties RoG ($p{=}1.00$). We report these query-level $p$-values rather than the more optimistic $n{=}60$ values, following the reviewer-standard practice for repeated-measures designs.
 
 \begin{figure}[tb]
   \centering
@@ -95,7 +95,7 @@ Table~\ref{tab:ablation} isolates each module's contribution. The primary config
   \end{tabular}
 \end{table}
 
-Key findings: (1) \texttt{+llm} achieves the best recall (0.70) but zero faithfulness. Adding Module~D (\texttt{+llm+faith}) reduces recall to 0.50 but enables faithfulness (0.98). This is the core tradeoff: Module~D's faithfulness check does not affect generation (it is post-hoc), but the \texttt{+llm+faith} configuration differs from \texttt{+llm} in that it reports faithfulness labels, which the paper's primary metric requires. (2) ComplEx scoring (\texttt{+learned}) \emph{harms} recall (0.20) because MRR=0.013 means scores are unreliable. (3) \texttt{full} (ComplEx + LLM + faith) underperforms \texttt{+llm+faith} (0.40 vs.\ 0.50), confirming ComplEx is counterproductive on noisy KGs.
+Key findings: (1) \texttt{+llm} achieves the best raw recall (0.70). We note that the BroadFaith=0 entries for \texttt{+llm} and \texttt{no\_faith} indicate that these configurations do not \emph{run} Module~D (no faithfulness labels are produced), not that an external evaluator judged their outputs unfaithful; a fully fair faithfulness comparison across ablation rows would require scoring every configuration's raw outputs with a single external judge, which we leave to future work. The value of Module~D lies in reranking (Table~\ref{tab:main}, Table~\ref{tab:robust}), not in the ablation faithfulness column. (2) ComplEx scoring (\texttt{+learned}) \emph{harms} recall (0.20) because MRR=0.013 means scores are unreliable. (3) \texttt{full} (ComplEx + LLM + faith) underperforms \texttt{+llm+faith} (0.40 vs.\ 0.50), confirming ComplEx is counterproductive on noisy KGs.
 
 \subsection{Faithfulness Validation (Q3)}
 \label{sec:exp:faith}
