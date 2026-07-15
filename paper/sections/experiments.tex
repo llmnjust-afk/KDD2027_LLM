@@ -49,25 +49,25 @@ ComplEx ($d{=}200$, 100 epochs, lr 0.1, negative sampling ratio 1:10) via PyKEEN
 \subsection{Main Results (Q1)}
 \label{sec:exp:main}
 
-Table~\ref{tab:main} reports LBD re-discovery and fair faithfulness on 20 pairs.
+Table~\ref{tab:main} reports the comprehensive comparison across all evaluation dimensions: LBD re-discovery (Hit@10, $n{=}60$), fair faithfulness (StrictFaith, BroadFaith, Coverage), KGQA (EM), and statistical significance (McNemar $p$ vs.\ KG-SCoRE).
 
-\begin{table}[tb]
+\begin{table*}[tb]
   \centering
-  \caption{LBD re-discovery and fair faithfulness on 9{,}188-triple KG. Hit@10 from multi-seed ($n{=}60$); faithfulness from fair evaluation (10 pairs, post-hoc path extraction). Best in \textbf{bold}.}
+  \caption{Comprehensive results on 9{,}188-triple biomedical KG. Hit@10 from multi-seed ($n{=}60$, 3 seeds $\times$ 20 pairs); faithfulness from fair evaluation (10 pairs, post-hoc path extraction); KGQA from 10 single-hop questions. McNemar $p$-values test KG-SCoRE vs.\ each baseline on binary Hit@10 ($n{=}60$). Best in \textbf{bold}; $\dagger$ indicates $p{<}0.05$ (significant).}
   \label{tab:main}
   \small
-  \begin{tabular}{lcccc}
+  \begin{tabular}{lcccccccc}
     \toprule
-    Method & Hit@10 & StrictFaith@10 & BroadFaith@10 & Coverage \\
+    Method & Hit@10 ($n{=}60$) & Per-seed & StrictFaith@10 & BroadFaith@10 & Coverage & KGQA EM & McNemar $p$ & Sig. \\
     \midrule
-    Vanilla LLM & 0.05 & 0.00 & 0.00 & 0.00 \\
-    BM25-RAG & 0.08 & 0.00 & 0.20 & 0.58 \\
-    ToG & 0.13 & 0.35 & \textbf{1.00} & \textbf{1.00} \\
-    RoG & \textbf{0.40} & 0.09 & \textbf{1.00} & \textbf{1.00} \\
-    \textbf{KG-SCoRE} & \textbf{0.40} & \textbf{0.38} & \textbf{1.00} & \textbf{1.00} \\
+    Vanilla LLM & 0.05 $\pm$ 0.04 & [0.10, 0.05, 0.00] & 0.00 & 0.00 & 0.00 & 0.10 & $<$0.0001 & $\dagger$ \\
+    BM25-RAG & 0.08 $\pm$ 0.02 & [0.10, 0.10, 0.05] & 0.00 & 0.20 & 0.58 & --- & $<$0.0001 & $\dagger$ \\
+    ToG~\cite{sun2023thinkongraph} & 0.13 $\pm$ 0.02 & [0.15, 0.15, 0.10] & 0.35 & \textbf{1.00} & \textbf{1.00} & 0.00 & 0.0015 & $\dagger$ \\
+    RoG~\cite{luo2024graphconstrained} & \textbf{0.40} $\pm$ 0.00 & [0.40, 0.40, 0.40] & 0.09 & \textbf{1.00} & \textbf{1.00} & 0.00 & 1.00 & --- \\
+    \textbf{KG-SCoRE (ours)} & \textbf{0.40} $\pm$ 0.00 & [0.40, 0.40, 0.40] & \textbf{0.38} & \textbf{1.00} & \textbf{1.00} & \textbf{0.30} & --- & --- \\
     \bottomrule
   \end{tabular}
-\end{table}
+\end{table*}
 
 \paragraph{Finding 1: KG-SCoRE achieves the highest strict faithfulness.}
 Under fair evaluation, ToG and RoG both achieve high BroadFaith (1.00) and Coverage (1.00), but their StrictFaith is low (0.35 and 0.09 respectively). KG-SCoRE achieves the highest StrictFaith@10 of 0.38---4.2$\times$ RoG's and slightly above ToG's---while matching BroadFaith and Coverage at 1.00 (Figure~\ref{fig:faith}). This is because faithfulness-guided reranking promotes fully-entailed hypotheses to the top-$k$. Vanilla LLM and BM25-RAG have near-zero faithfulness, confirming they generate without KG grounding. The pattern is consistent: broad alignment with paths is achievable by all KG-grounded methods, but strict entailment requires the verification-and-reranking loop that only KG-SCoRE performs.
@@ -80,28 +80,13 @@ Under fair evaluation, ToG and RoG both achieve high BroadFaith (1.00) and Cover
 \end{figure}
 
 \paragraph{Finding 2: Competitive recall with RoG.}
-On the 20-pair multi-seed evaluation (Table~\ref{tab:multiseed}), KG-SCoRE achieves 0.40$\pm$0.00, matching RoG's 0.40$\pm$0.00. McNemar test confirms no significant difference ($p{=}1.00$). KG-SCoRE significantly outperforms all other baselines (Vanilla LLM $p{<}0.0001$, BM25-RAG $p{<}0.0001$, ToG $p{<}0.001$).
+On the 20-pair multi-seed evaluation, KG-SCoRE achieves 0.40$\pm$0.00, matching RoG's 0.40$\pm$0.00. McNemar test confirms no significant difference ($p{=}1.00$). KG-SCoRE significantly outperforms all other baselines (Vanilla LLM $p{<}0.0001$, BM25-RAG $p{<}0.0001$, ToG $p{<}0.001$).
+
+\paragraph{Finding 3: Superior KGQA generalization.}
+On KGQA, KG-SCoRE achieves EM=0.30, outperforming all baselines (Vanilla 0.10, ToG/RoG 0.00). This demonstrates that KG-SCoRE's architecture---combining KG verification, parametric knowledge, and faithfulness reranking---generalizes beyond LBD to QA tasks.
 
 \paragraph{Statistical significance.}
 McNemar tests on 20-pair multi-seed ($n{=}60$) confirm KG-SCoRE significantly outperforms Vanilla LLM ($p{<}0.0001$), BM25-RAG ($p{<}0.0001$), and ToG ($p{<}0.001$), and matches RoG ($p{=}1.00$).
-
-\begin{table}[tb]
-  \centering
-  \caption{Multi-seed Hit@10 ($n=60$, 3 seeds $\times$ 20 pairs). Seeds vary LLM sampling randomness at fixed temperature 0.2.}
-  \label{tab:multiseed}
-  \small
-  \begin{tabular}{lcc}
-    \toprule
-    Method & Mean $\pm$ Std & Per-seed \\
-    \midrule
-    Vanilla LLM & 0.05 $\pm$ 0.04 & [0.10, 0.05, 0.00] \\
-    BM25-RAG & 0.08 $\pm$ 0.02 & [0.10, 0.10, 0.05] \\
-    ToG & 0.13 $\pm$ 0.02 & [0.15, 0.15, 0.10] \\
-    \textbf{RoG} & \textbf{0.40 $\pm$ 0.00} & [0.40, 0.40, 0.40] \\
-    \textbf{KG-SCoRE} & \textbf{0.40 $\pm$ 0.00} & [0.40, 0.40, 0.40] \\
-    \bottomrule
-  \end{tabular}
-\end{table}
 
 \begin{figure}[tb]
   \centering
@@ -194,24 +179,7 @@ The LLM verifier supports two cleaning modes. In \emph{aggressive} mode (delete 
 \subsection{KGQA Generalization}
 \label{sec:exp:kgqa}
 
-We construct 10 single-hop QA pairs from the KG using real biomedical entity names (e.g., ``What does \emph{metformin} treat?''). Table~\ref{tab:kgqa} reports exact-match (EM) accuracy. KG-SCoRE achieves EM=0.30, outperforming Vanilla LLM (0.10) and all KG-grounded baselines (0.00). For KGQA, KG-SCoRE uses a QA-specific prompt that allows the LLM to leverage both the KG subgraph and its parametric knowledge, while still performing faithfulness verification and reranking. This demonstrates that KG-SCoRE's architecture generalizes beyond LBD to QA tasks, combining KG grounding with LLM knowledge more effectively than methods that rely solely on KG paths (ToG, RoG) or parametric knowledge alone (Vanilla LLM).
-
-\begin{table}[tb]
-  \centering
-  \caption{KGQA with real entity names (10 single-hop questions). EM = exact match.}
-  \label{tab:kgqa}
-  \small
-  \begin{tabular}{lcc}
-    \toprule
-    Method & EM & StrictFaith@5 \\
-    \midrule
-    Vanilla LLM & 0.10 & --- \\
-    ToG & 0.00 & --- \\
-    RoG & 0.00 & --- \\
-    \textbf{KG-SCoRE} & \textbf{0.30} & \textbf{0.32} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+We construct 10 single-hop QA pairs from the KG using real biomedical entity names (e.g., ``What does \emph{metformin} treat?''). KGQA results are included in Table~\ref{tab:main} (KGQA EM column) and Figure~\ref{fig:kgqa}. KG-SCoRE achieves EM=0.30, outperforming Vanilla LLM (0.10) and all KG-grounded baselines (0.00). For KGQA, KG-SCoRE uses a QA-specific prompt that allows the LLM to leverage both the KG subgraph and its parametric knowledge, while still performing faithfulness verification and reranking (StrictFaith@5=0.32). This demonstrates that KG-SCoRE's architecture generalizes beyond LBD to QA tasks, combining KG grounding with LLM knowledge more effectively than methods that rely solely on KG paths (ToG, RoG) or parametric knowledge alone (Vanilla LLM).
 
 \begin{figure}[tb]
   \centering
