@@ -154,61 +154,53 @@ Since we know which triples are synthetic noise (score $<0.5$), we directly eval
 
 \begin{table}[tb]
   \centering
-  \caption{KG cleaning evaluation (200 triples: 100 noise + 100 clean). The LLM verifier detects all noise (Recall=1.0) but also flags 95/100 clean triples (high FP rate).}
-  \label{tab:cleaning}
+  \caption{KG cleaning evaluation (200 triples: 100 noise + 100 clean) and $\tau$ sensitivity (5 pairs). Two cleaning modes offer a configurable precision--recall tradeoff; $\tau$ sweep confirms ComplEx scores are unhelpful on noisy KGs.}
+  \label{tab:cleaning_tau}
   \small
   \begin{tabular}{lcccc}
     \toprule
-    Mode & Precision & Recall & F1 & Accuracy \\
+    \multicolumn{5}{l}{\textit{(a) KG Cleaning Modes}} \\
+    Mode & Precision & Recall & F1 & Acc. \\
     \midrule
-    Conservative (delete contradicted only) & 0.833 & 0.050 & 0.094 & 0.520 \\
-    Aggressive (delete contradicted + unverifiable) & 0.515 & 1.000 & 0.680 & 0.530 \\
+    Conservative & 0.833 & 0.050 & 0.094 & 0.520 \\
+    Aggressive & 0.515 & 1.000 & 0.680 & 0.530 \\
+    \midrule
+    \multicolumn{5}{l}{\textit{(b) $\tau$ Sensitivity (ComplEx threshold)}} \\
+    $\tau$ & \#filtered & Hit@10 & & \\
+    \midrule
+    0.05 & 0 & 0.20 & & \\
+    0.15 & 0 & 0.20 & & \\
+    0.25 & 0 & 0.00 & & \\
+    0.40 & 110 & 0.20 & & \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-The LLM verifier supports two cleaning modes. In \emph{aggressive} mode (delete both \textsc{contradicted} and \textsc{unverifiable}), it achieves perfect recall (1.000) but low precision (0.515), yielding F1=0.680. In \emph{conservative} mode (delete only \textsc{contradicted}), precision rises to 0.833 but recall drops to 0.050 (F1=0.094) (Figure~\ref{fig:cleaning}). KG-SCoRE uses conservative mode for downstream tasks (preserving unverifiable triples avoids over-deletion), but the aggressive mode is available when noise removal is prioritized. This configurable precision--recall tradeoff is a practical advantage: the aggressive mode removes all noise at the cost of false positives, while the conservative mode preserves clean triples at the cost of missed noise.
+The LLM verifier supports two cleaning modes (Table~\ref{tab:cleaning_tau}(a)). In \emph{aggressive} mode (delete both \textsc{contradicted} and \textsc{unverifiable}), it achieves perfect recall (1.000) but low precision (0.515), yielding F1=0.680. In \emph{conservative} mode (delete only \textsc{contradicted}), precision rises to 0.833 but recall drops to 0.050 (F1=0.094) (Figure~\ref{fig:cleaning}). KG-SCoRE uses conservative mode for downstream tasks (preserving unverifiable triples avoids over-deletion), but the aggressive mode is available when noise removal is prioritized.
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.75\linewidth]{figures/kg_cleaning_tradeoff.pdf}
-  \caption{KG cleaning precision--recall tradeoff. Conservative mode (delete only contradicted) achieves high precision (0.83); aggressive mode (delete contradicted + unverifiable) achieves perfect recall (1.0).}
+  \includegraphics[width=0.95\linewidth]{figures/kg_cleaning_combined.pdf}
+  \caption{KG cleaning analysis. (a)--(b) Confusion matrices for conservative and aggressive modes. (c) Precision, recall, and F1 comparison: conservative mode achieves high precision (0.83); aggressive mode achieves perfect recall (1.0).}
   \label{fig:cleaning}
 \end{figure}
 
 \subsection{KGQA Generalization}
 \label{sec:exp:kgqa}
 
-We construct 10 single-hop QA pairs from the KG using real biomedical entity names (e.g., ``What does \emph{metformin} treat?''). KGQA results are included in Table~\ref{tab:main} (KGQA EM column) and Figure~\ref{fig:kgqa}. KG-SCoRE achieves EM=0.30, outperforming Vanilla LLM (0.10) and all KG-grounded baselines (0.00). For KGQA, KG-SCoRE uses a QA-specific prompt that allows the LLM to leverage both the KG subgraph and its parametric knowledge, while still performing faithfulness verification and reranking (StrictFaith@5=0.32). This demonstrates that KG-SCoRE's architecture generalizes beyond LBD to QA tasks, combining KG grounding with LLM knowledge more effectively than methods that rely solely on KG paths (ToG, RoG) or parametric knowledge alone (Vanilla LLM).
+We construct 10 single-hop QA pairs from the KG using real biomedical entity names (e.g., ``What does \emph{metformin} treat?''). KGQA results are included in Table~\ref{tab:main} (KGQA EM column) and Figure~\ref{fig:kgqa}. KG-SCoRE achieves EM=0.30, outperforming Vanilla LLM (0.10) and all KG-grounded baselines (0.00). For KGQA, KG-SCoRE uses a QA-specific prompt that allows the LLM to leverage both the KG subgraph and its parametric knowledge, while still performing faithfulness verification and reranking (StrictFaith@5=0.32, Figure~\ref{fig:kgqa}(b)). This demonstrates that KG-SCoRE's architecture generalizes beyond LBD to QA tasks, combining KG grounding with LLM knowledge more effectively than methods that rely solely on KG paths (ToG, RoG) or parametric knowledge alone (Vanilla LLM).
 
 \begin{figure}[tb]
   \centering
-  \includegraphics[width=0.75\linewidth]{figures/kgqa_em.pdf}
-  \caption{KGQA exact-match accuracy (10 single-hop questions). KG-SCoRE achieves EM=0.30, outperforming all baselines by combining KG grounding with parametric knowledge.}
+  \includegraphics[width=0.95\linewidth]{figures/kgqa_combined.pdf}
+  \caption{KGQA results (10 single-hop questions). (a) Exact-match accuracy: KG-SCoRE achieves EM=0.30, outperforming all baselines. (b) StrictFaith@5: only KG-SCoRE produces traceable answers (0.32), while baselines have zero faithfulness on QA.}
   \label{fig:kgqa}
 \end{figure}
 
 \subsection{$\tau$ Sensitivity Analysis}
 \label{sec:exp:tau}
 
-We sweep the ComplEx confidence threshold $\tau$ over four values to assess its effect on triple filtering and downstream recall (Table~\ref{tab:tau}). At $\tau{\leq}0.25$, no triples are filtered (all ComplEx scores exceed the threshold), yielding identical Hit@10. At $\tau{=}0.40$, 110 low-confidence triples are removed, but Hit@10 does not improve. This confirms that ComplEx scores on noisy KGs (MRR=0.013) do not provide useful signal for triple filtering, reinforcing the ablation finding that learned scoring is counterproductive in this regime.
-
-\begin{table}[tb]
-  \centering
-  \caption{$\tau$ sensitivity (5 pairs, full pipeline with ComplEx). \#below = triples filtered.}
-  \label{tab:tau}
-  \small
-  \begin{tabular}{lcc}
-    \toprule
-    $\tau$ & \#below & Hit@10 \\
-    \midrule
-    0.05 & 0 & 0.20 \\
-    0.15 & 0 & 0.20 \\
-    0.25 & 0 & 0.00 \\
-    0.40 & 110 & 0.20 \\
-    \bottomrule
-  \end{tabular}
-\end{table}
+We sweep the ComplEx confidence threshold $\tau$ over four values to assess its effect on triple filtering and downstream recall (Table~\ref{tab:cleaning_tau}(b)). At $\tau{\leq}0.25$, no triples are filtered (all ComplEx scores exceed the threshold), yielding identical Hit@10. At $\tau{=}0.40$, 110 low-confidence triples are removed, but Hit@10 does not improve. This confirms that ComplEx scores on noisy KGs (MRR=0.013) do not provide useful signal for triple filtering, reinforcing the ablation finding that learned scoring is counterproductive in this regime.
 
 \subsection{Case Study: Traceable Hypothesis Generation}
 \label{sec:exp:case}
