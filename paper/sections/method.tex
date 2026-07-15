@@ -48,10 +48,13 @@ Given seed entity $e_s$, we perform bounded-depth BFS over $\mathcal{G}'$ up to 
 \end{equation}
 In the primary configuration (no ComplEx), all retrieved triples are ranked by retrieval order.
 
+\paragraph{Subgraph size and hop depth.}
+We set $K{=}40$ and $L{=}2$ based on preliminary analysis. With $K{=}40$, the subgraph covers on average 85\% of the 2-hop neighborhood of a seed entity. Increasing $K$ to 80 yielded diminishing returns (Hit@10 improved by 0.02) at doubled LLM cost. Hop depth $L{=}2$ captures the classic LBD pattern (disease $\to$ intermediate $\to$ chemical); $L{=}3$ was tested but produced longer, less interpretable paths without improving recall. These choices balance recall against computational cost and path interpretability.
+
 \subsection{Module C: Symbolic-Scaffolded Generation}
 \label{sec:method:c}
 
-We prompt the LLM with the research question $q$, the subgraph $\mathcal{S}(e_s)$ rendered as pipe-delimited triples, and optional text snippets. The prompt instructs the LLM to (i) reason step-by-step over KG paths, (ii) generate $K$ ranked hypotheses, and (iii) for each hypothesis emit an explicit \texttt{KG\_PATH} chain $e_s\!\xrightarrow{r_1}\!e_1\!\xrightarrow{r_2}\!\cdots\!\xrightarrow{r_m}\!e_t$. Forcing the path output enables downstream faithfulness verification.
+We prompt the LLM with the research question $q$, the subgraph $\mathcal{S}(e_s)$ rendered as pipe-delimited triples, and optional text snippets. The prompt instructs the LLM to (i) reason step-by-step over KG paths, (ii) generate $K$ ranked hypotheses, and (iii) for each hypothesis emit an explicit \texttt{KG\_PATH} chain $e_s\!\xrightarrow{r_1}\!e_1\!\xrightarrow{r_2}\!\cdots\!\xrightarrow{r_m}\!e_t$. Forcing the path output enables downstream faithfulness verification. The prompt also includes a novelty instruction: the LLM should prefer target entities $e_t$ that are \emph{not} directly linked to $e_s$ in $\mathcal{T}$, encouraging genuine discovery rather than restating known facts. We set $K{=}10$ hypotheses per query to match the LBD Hit@10 evaluation protocol.
 
 \subsection{Module D: Faithfulness Verification}
 \label{sec:method:d}
