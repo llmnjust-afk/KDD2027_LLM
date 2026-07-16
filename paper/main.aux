@@ -1,0 +1,210 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{zhang2025exploring,bhasuran2023literature}
+\citation{zhao2026survey,brown2025systematic}
+\citation{kilicoglu2012semmeddb,kilicoglu2020broadcoverage}
+\citation{sun2023thinkongraph}
+\citation{ma2024thinkongraph}
+\citation{luo2024graphconstrained}
+\citation{mavromatis2025gnnrag}
+\citation{swanson1986undiscovered,hristovski2015constructing,bhasuran2023literature}
+\citation{yao2021typing}
+\citation{trouillon2016complex,sun2019rotate}
+\citation{trouillon2016complex}
+\@writefile{toc}{\contentsline {section}{Abstract}{1}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{pan2023unifying,han2024graphrag}
+\citation{sun2023thinkongraph}
+\citation{ma2024thinkongraph}
+\citation{luo2024graphconstrained}
+\citation{mavromatis2025gnnrag}
+\citation{tan2025pathsovergraph}
+\citation{jiang2023structgpt}
+\citation{li2026grounding}
+\citation{zhu2026hybrid}
+\citation{swanson1986undiscovered}
+\citation{hristovski2015constructing,bhasuran2023literature}
+\citation{kilicoglu2012semmeddb,kilicoglu2020broadcoverage}
+\citation{qi2024large}
+\citation{liu2024literature}
+\citation{yang2025bioverge}
+\citation{tyagin2025biomedical}
+\citation{xiao2026bioharness}
+\citation{ji2021survey,hogan2021knowledge,rossi2021knowledge}
+\citation{bordes2013irreflexive}
+\citation{trouillon2016complex,trouillon2017knowledge}
+\citation{dettmers2018convolutional}
+\citation{schlichtkrull2018modeling}
+\citation{sun2019rotate}
+\citation{yao2021typing}
+\citation{kilicoglu2020broadcoverage}
+\citation{min2023factscore}
+\citation{zhao2026survey}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{KG-augmented LLM reasoning.}{2}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Literature-based discovery and hypothesis generation.}{2}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Knowledge graph embedding and completion.}{2}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{KG noise detection and quality assessment.}{2}{section*.7}\protected@file@percent }
+\citation{brown2025systematic,neha2025retrievalaugmented}
+\citation{honovich2021evaluating}
+\citation{min2023factscore}
+\citation{han2024graphrag}
+\citation{trouillon2016complex}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces KG-SCoRE pipeline. Module\nonbreakingspace A verifies KG triples via LLM prompting (optionally gated by ComplEx scores). Module\nonbreakingspace B retrieves scored multi-hop subgraphs. Module\nonbreakingspace C generates KG-scaffolded hypotheses. Module\nonbreakingspace D verifies faithfulness against KG paths.\relax }}{3}{figure.caption.9}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:framework}{{1}{3}{KG-SCoRE pipeline. Module~A verifies KG triples via LLM prompting (optionally gated by ComplEx scores). Module~B retrieves scored multi-hop subgraphs. Module~C generates KG-scaffolded hypotheses. Module~D verifies faithfulness against KG paths.\relax }{figure.caption.9}{}}
+\@writefile{toc}{\contentsline {paragraph}{RAG, faithfulness, and grounding.}{3}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Method}{3}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{3}{Method}{section.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Problem Formulation}{3}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Module A: KG Verification}{3}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:method:a}{{3.2}{3}{Module A: KG Verification}{subsection.3.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Optional learned triple scoring.}{3}{section*.10}\protected@file@percent }
+\newlabel{eq:complex}{{1}{3}{Optional learned triple scoring}{equation.3.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{LLM verification.}{3}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Prompt design.}{3}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Complexity.}{3}{section*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Module B: Symbolic Subgraph Retrieval}{3}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:method:b}{{3.3}{3}{Module B: Symbolic Subgraph Retrieval}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Subgraph size and hop depth.}{3}{section*.14}\protected@file@percent }
+\citation{brown2025systematic}
+\citation{luo2024graphconstrained}
+\citation{kilicoglu2012semmeddb}
+\citation{kilicoglu2020broadcoverage}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Module C: Symbolic-Scaffolded Generation}{4}{subsection.3.4}\protected@file@percent }
+\newlabel{sec:method:c}{{3.4}{4}{Module C: Symbolic-Scaffolded Generation}{subsection.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Module D: Faithfulness Verification}{4}{subsection.3.5}\protected@file@percent }
+\newlabel{sec:method:d}{{3.5}{4}{Module D: Faithfulness Verification}{subsection.3.5}{}}
+\newlabel{eq:faith_strict}{{4}{4}{Module D: Faithfulness Verification}{equation.3.4}{}}
+\newlabel{eq:faith_broad}{{5}{4}{Module D: Faithfulness Verification}{equation.3.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Faithfulness-guided reranking.}{4}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Entailment classification criteria.}{4}{section*.16}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces KG-SCoRE inference\relax }}{4}{algorithm.1}\protected@file@percent }
+\newlabel{alg:kgscore}{{1}{4}{KG-SCoRE inference\relax }{algorithm.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Formal novelty definition.}{4}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Full Pipeline and Ablation Configurations}{4}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experiments}{4}{section.4}\protected@file@percent }
+\newlabel{sec:exp}{{4}{4}{Experiments}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Setup}{4}{subsection.4.1}\protected@file@percent }
+\newlabel{sec:exp:setup}{{4.1}{4}{Setup}{subsection.4.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Knowledge graph.}{4}{section*.18}\protected@file@percent }
+\citation{hristovski2015constructing,bhasuran2023literature}
+\citation{sun2023thinkongraph}
+\citation{luo2024graphconstrained}
+\citation{sun2023thinkongraph}
+\citation{luo2024graphconstrained}
+\@writefile{toc}{\contentsline {paragraph}{Gold standard.}{5}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Baselines.}{5}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Metrics.}{5}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{ComplEx training.}{5}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Main Results (Q1)}{5}{subsection.4.2}\protected@file@percent }
+\newlabel{sec:exp:main}{{4.2}{5}{Main Results (Q1)}{subsection.4.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{Finding 1: KG-SCoRE achieves the highest strict faithfulness.}{5}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Finding 2: Competitive recall with RoG.}{5}{section*.26}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Fair faithfulness comparison (10 pairs, post-hoc path extraction). KG-SCoRE and ToG lead on StrictFaith@10; all KG-grounded methods achieve BroadFaith and Coverage near 1.00.\relax }}{5}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:faith}{{2}{5}{Fair faithfulness comparison (10 pairs, post-hoc path extraction). KG-SCoRE and ToG lead on StrictFaith@10; all KG-grounded methods achieve BroadFaith and Coverage near 1.00.\relax }{figure.caption.25}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces LBD re-discovery Hit@10 across methods ($n{=}60$, 3 seeds $\times $ 20 pairs). KG-SCoRE matches RoG at 0.40, both significantly outperforming other baselines.\relax }}{5}{figure.caption.29}\protected@file@percent }
+\newlabel{fig:hit10}{{3}{5}{LBD re-discovery Hit@10 across methods ($n{=}60$, 3 seeds $\times $ 20 pairs). KG-SCoRE matches RoG at 0.40, both significantly outperforming other baselines.\relax }{figure.caption.29}{}}
+\@writefile{toc}{\contentsline {paragraph}{Finding 3: Promising KGQA result.}{5}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Statistical significance.}{5}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Ablation: LLM Verification vs.\ Learned Scoring (Q2)}{5}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:exp:ablation}{{4.3}{5}{Ablation: LLM Verification vs.\ Learned Scoring (Q2)}{subsection.4.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comprehensive results on 9{,}188-triple biomedical KG. Hit@10 from multi-seed (3 seeds $\times $ 20 pairs); StrictFaith reported as mean$\pm $std over 3 seeds; faithfulness from fair evaluation (10 pairs, post-hoc path extraction); KGQA from 10 single-hop questions. The $p$-column reports a query-level paired permutation test ($n{=}20$ queries) of KG-SCoRE vs.\ each baseline on Hit@10. Best in \textbf  {bold}; $\dagger $ indicates $p{<}0.05$.\relax }}{6}{table.caption.23}\protected@file@percent }
+\newlabel{tab:main}{{1}{6}{Comprehensive results on 9{,}188-triple biomedical KG. Hit@10 from multi-seed (3 seeds $\times $ 20 pairs); StrictFaith reported as mean$\pm $std over 3 seeds; faithfulness from fair evaluation (10 pairs, post-hoc path extraction); KGQA from 10 single-hop questions. The $p$-column reports a query-level paired permutation test ($n{=}20$ queries) of KG-SCoRE vs.\ each baseline on Hit@10. Best in \textbf {bold}; $\dagger $ indicates $p{<}0.05$.\relax }{table.caption.23}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Ablation on 9{,}188-triple KG (10 pairs). \texttt  {+llm+faith} is the primary configuration.\relax }}{6}{table.caption.30}\protected@file@percent }
+\newlabel{tab:ablation}{{2}{6}{Ablation on 9{,}188-triple KG (10 pairs). \texttt {+llm+faith} is the primary configuration.\relax }{table.caption.30}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Faithfulness validation. Two independent judges compared against the original LLM judge.\relax }}{6}{table.caption.31}\protected@file@percent }
+\newlabel{tab:faith_val}{{3}{6}{Faithfulness validation. Two independent judges compared against the original LLM judge.\relax }{table.caption.31}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Faithfulness Validation (Q3)}{6}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:exp:faith}{{4.4}{6}{Faithfulness Validation (Q3)}{subsection.4.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Robustness of StrictFaith@10 gains (10 pairs). The LLM-judged gain from reranking (0.11$\to $0.34) largely does not transfer to an independent rule-based judge (0.11), revealing partial circularity in LLM-judged faithfulness.\relax }}{6}{table.caption.33}\protected@file@percent }
+\newlabel{tab:robust}{{4}{6}{Robustness of StrictFaith@10 gains (10 pairs). The LLM-judged gain from reranking (0.11$\to $0.34) largely does not transfer to an independent rule-based judge (0.11), revealing partial circularity in LLM-judged faithfulness.\relax }{table.caption.33}{}}
+\@writefile{toc}{\contentsline {paragraph}{Robustness of reranking gains to an independent judge.}{6}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}KG Cleaning Evaluation (Q4)}{6}{subsection.4.5}\protected@file@percent }
+\newlabel{sec:exp:cleaning}{{4.5}{6}{KG Cleaning Evaluation (Q4)}{subsection.4.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces KG cleaning evaluation (200 triples: 100 noise + 100 clean) and $\tau $ sensitivity (5 pairs). Two cleaning modes offer a configurable precision--recall tradeoff; $\tau $ sweep confirms ComplEx scores are unhelpful on noisy KGs.\relax }}{7}{table.caption.34}\protected@file@percent }
+\newlabel{tab:cleaning_tau}{{5}{7}{KG cleaning evaluation (200 triples: 100 noise + 100 clean) and $\tau $ sensitivity (5 pairs). Two cleaning modes offer a configurable precision--recall tradeoff; $\tau $ sweep confirms ComplEx scores are unhelpful on noisy KGs.\relax }{table.caption.34}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces KG cleaning analysis. (a)--(b) Confusion matrices for conservative and aggressive modes. (c) Precision, recall, and F1 comparison: conservative mode achieves high precision (0.83); aggressive mode achieves perfect recall (1.0).\relax }}{7}{figure.caption.35}\protected@file@percent }
+\newlabel{fig:cleaning}{{4}{7}{KG cleaning analysis. (a)--(b) Confusion matrices for conservative and aggressive modes. (c) Precision, recall, and F1 comparison: conservative mode achieves high precision (0.83); aggressive mode achieves perfect recall (1.0).\relax }{figure.caption.35}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}KGQA Generalization}{7}{subsection.4.6}\protected@file@percent }
+\newlabel{sec:exp:kgqa}{{4.6}{7}{KGQA Generalization}{subsection.4.6}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces KGQA results (10 single-hop questions). (a) Exact-match accuracy: KG-SCoRE achieves EM=0.30, outperforming all baselines. (b) StrictFaith@5: only KG-SCoRE produces traceable answers (0.32), while baselines have zero faithfulness on QA.\relax }}{7}{figure.caption.36}\protected@file@percent }
+\newlabel{fig:kgqa}{{5}{7}{KGQA results (10 single-hop questions). (a) Exact-match accuracy: KG-SCoRE achieves EM=0.30, outperforming all baselines. (b) StrictFaith@5: only KG-SCoRE produces traceable answers (0.32), while baselines have zero faithfulness on QA.\relax }{figure.caption.36}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}$\tau $ Sensitivity Analysis}{7}{subsection.4.7}\protected@file@percent }
+\newlabel{sec:exp:tau}{{4.7}{7}{$\tau $ Sensitivity Analysis}{subsection.4.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}Case Study and Error Analysis}{7}{subsection.4.8}\protected@file@percent }
+\newlabel{sec:exp:case}{{4.8}{7}{Case Study and Error Analysis}{subsection.4.8}{}}
+\@writefile{toc}{\contentsline {paragraph}{Case study.}{7}{section*.37}\protected@file@percent }
+\newlabel{sec:exp:errors}{{4.8}{7}{Case study}{section*.37}{}}
+\@writefile{toc}{\contentsline {paragraph}{Recall failures (false negatives).}{7}{section*.38}\protected@file@percent }
+\bibstyle{ACM-Reference-Format}
+\bibdata{refs}
+\bibcite{bhasuran2023literature}{{1}{2023}{{Bhasuran et~al\mbox  {.}}}{{}}}
+\bibcite{bordes2013irreflexive}{{2}{2013}{{Bordes et~al\mbox  {.}}}{{}}}
+\bibcite{brown2025systematic}{{3}{2025}{{Brown et~al\mbox  {.}}}{{}}}
+\@writefile{toc}{\contentsline {paragraph}{Faithfulness failures.}{8}{section*.39}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{KG cleaning errors.}{8}{section*.40}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Correction accuracy.}{8}{section*.41}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}Discussion}{8}{subsection.4.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Practical implications.}{8}{section*.42}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reproducibility.}{8}{section*.43}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion}{8}{section.5}\protected@file@percent }
+\newlabel{sec:conclusion}{{5}{8}{Conclusion}{section.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Limitations.}{8}{section*.44}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Future work.}{8}{section*.45}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{8}{section*.47}\protected@file@percent }
+\bibcite{dettmers2018convolutional}{{4}{2018}{{Dettmers et~al\mbox  {.}}}{{}}}
+\bibcite{han2024graphrag}{{5}{2024}{{Han et~al\mbox  {.}}}{{}}}
+\bibcite{hogan2021knowledge}{{6}{2021}{{Hogan et~al\mbox  {.}}}{{}}}
+\bibcite{honovich2021evaluating}{{7}{2021}{{Honovich et~al\mbox  {.}}}{{}}}
+\bibcite{hristovski2015constructing}{{8}{2015}{{Hristovski et~al\mbox  {.}}}{{}}}
+\bibcite{ji2021survey}{{9}{2021}{{Ji et~al\mbox  {.}}}{{}}}
+\bibcite{jiang2023structgpt}{{10}{2023}{{Jiang et~al\mbox  {.}}}{{}}}
+\bibcite{kilicoglu2020broadcoverage}{{11}{2020}{{Kilicoglu et~al\mbox  {.}}}{{}}}
+\bibcite{kilicoglu2012semmeddb}{{12}{2012}{{Kilicoglu et~al\mbox  {.}}}{{}}}
+\bibcite{li2026grounding}{{13}{2026}{{Li and Song}}{{}}}
+\bibcite{liu2024literature}{{14}{2024}{{Liu et~al\mbox  {.}}}{{}}}
+\bibcite{luo2024graphconstrained}{{15}{2024}{{Luo et~al\mbox  {.}}}{{}}}
+\bibcite{ma2024thinkongraph}{{16}{2024}{{Ma et~al\mbox  {.}}}{{}}}
+\bibcite{mavromatis2025gnnrag}{{17}{2025}{{Mavromatis and Karypis}}{{}}}
+\bibcite{min2023factscore}{{18}{2023}{{Min et~al\mbox  {.}}}{{}}}
+\bibcite{neha2025retrievalaugmented}{{19}{2025}{{Neha et~al\mbox  {.}}}{{}}}
+\bibcite{pan2023unifying}{{20}{2023}{{Pan et~al\mbox  {.}}}{{}}}
+\bibcite{qi2024large}{{21}{2024}{{Qi et~al\mbox  {.}}}{{}}}
+\bibcite{rossi2021knowledge}{{22}{2021}{{Rossi et~al\mbox  {.}}}{{}}}
+\bibcite{schlichtkrull2018modeling}{{23}{2018}{{Schlichtkrull et~al\mbox  {.}}}{{}}}
+\bibcite{sun2023thinkongraph}{{24}{2023}{{Sun et~al\mbox  {.}}}{{}}}
+\bibcite{sun2019rotate}{{25}{2019}{{Sun et~al\mbox  {.}}}{{}}}
+\bibcite{swanson1986undiscovered}{{26}{1986}{{Swanson}}{{}}}
+\bibcite{tan2025pathsovergraph}{{27}{2025}{{Tan et~al\mbox  {.}}}{{}}}
+\bibcite{trouillon2017knowledge}{{28}{2017}{{Trouillon et~al\mbox  {.}}}{{}}}
+\bibcite{trouillon2016complex}{{29}{2016}{{Trouillon et~al\mbox  {.}}}{{}}}
+\bibcite{tyagin2025biomedical}{{30}{2025}{{Tyagin et~al\mbox  {.}}}{{}}}
+\bibcite{xiao2026bioharness}{{31}{2026}{{Xiao et~al\mbox  {.}}}{{}}}
+\bibcite{yang2025bioverge}{{32}{2025}{{Yang et~al\mbox  {.}}}{{}}}
+\bibcite{yao2021typing}{{33}{2021}{{Yao and Barbosa}}{{}}}
+\bibcite{zhang2025exploring}{{34}{2025}{{Zhang et~al\mbox  {.}}}{{}}}
+\bibcite{zhao2026survey}{{35}{2026}{{Zhao et~al\mbox  {.}}}{{}}}
+\bibcite{zhu2026hybrid}{{36}{2026}{{Zhu et~al\mbox  {.}}}{{}}}
+\newlabel{tocindent-1}{0pt}
+\newlabel{tocindent0}{0pt}
+\newlabel{tocindent1}{4.185pt}
+\newlabel{tocindent2}{10.34999pt}
+\newlabel{tocindent3}{0pt}
+\newlabel{TotPages}{{9}{9}{}{page.9}{}}
+\gdef \@abspage@last{9}
