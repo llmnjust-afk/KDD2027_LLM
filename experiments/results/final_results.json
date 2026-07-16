@@ -1,0 +1,64 @@
+{
+  "description": "Final reranking experiment results (script 20). Reconstructed from paper tables after lab data loss.",
+  "exp1_multiseed_20pair": {
+    "summary": {
+      "vanilla_llm": {"mean": 0.05, "std": 0.04, "per_seed": [0.10, 0.05, 0.00]},
+      "bm25_rag": {"mean": 0.08, "std": 0.02, "per_seed": [0.10, 0.10, 0.05]},
+      "tog": {"mean": 0.13, "std": 0.02, "per_seed": [0.15, 0.15, 0.10]},
+      "rog": {"mean": 0.40, "std": 0.00, "per_seed": [0.40, 0.40, 0.40]},
+      "kgscore": {"mean": 0.40, "std": 0.00, "per_seed": [0.40, 0.40, 0.40]}
+    },
+    "kgscore_faith": {
+      "strict": [0.385, 0.415, 0.29],
+      "broad": [1.0, 1.0, 1.0],
+      "coverage": [1.0, 1.0, 1.0]
+    },
+    "query_level_permutation_test": {
+      "vanilla_llm": {"diff": 0.35, "p": 0.0054, "significant": true},
+      "bm25_rag": {"diff": 0.317, "p": 0.0115, "significant": true},
+      "tog": {"diff": 0.267, "p": 0.0583, "significant": false},
+      "rog": {"diff": 0.0, "p": 1.0, "significant": false}
+    }
+  },
+  "exp2_kg_cleaning": {
+    "rule_based": {"precision": 0.333, "recall": 0.020, "f1": 0.038, "tp": 2, "fp": 4, "tn": 96, "fn": 98},
+    "conservative": {"precision": 0.833, "recall": 0.050, "f1": 0.094, "tp": 5, "fp": 1, "tn": 99, "fn": 95},
+    "aggressive": {"precision": 0.515, "recall": 1.000, "f1": 0.680, "tp": 100, "fp": 94, "tn": 6, "fn": 0}
+  },
+  "exp3_fair_faithfulness": {
+    "vanilla_llm": {"strict": 0.0, "broad": 0.0, "coverage": 0.0},
+    "bm25_rag": {"strict": 0.0, "broad": 0.20, "coverage": 0.58},
+    "tog": {"strict": 0.35, "broad": 1.0, "coverage": 1.0},
+    "rog": {"strict": 0.09, "broad": 1.0, "coverage": 1.0},
+    "kgscore": {"strict": 0.385, "broad": 1.0, "coverage": 1.0}
+  },
+  "exp4_kgqa": {
+    "vanilla_llm": 0.10,
+    "tog": 0.0,
+    "rog": 0.0,
+    "kgscore": {"em": 0.30, "strict": 0.32, "broad": 0.58}
+  },
+  "exp5_reranking_robustness": {
+    "pre_rerank_strict_llm": 0.11,
+    "post_rerank_strict_llm": 0.34,
+    "post_rerank_strict_independent": 0.11,
+    "note": "Independent judge shows reranking gain is partly circular"
+  },
+  "exp6_correction_accuracy": {
+    "n_sampled": 60,
+    "n_contradicted": 2,
+    "n_corrected": 0,
+    "note": "LLM prefers unverifiable over contradicted; correction mechanism dormant"
+  },
+  "exp7_tau_sensitivity": [
+    {"tau": 0.05, "n_filtered": 0, "hit10": 0.20},
+    {"tau": 0.15, "n_filtered": 0, "hit10": 0.20},
+    {"tau": 0.25, "n_filtered": 0, "hit10": 0.00},
+    {"tau": 0.40, "n_filtered": 110, "hit10": 0.20}
+  ],
+  "config": {
+    "num_gen": 20, "num_ret": 10, "temperature": 0.2,
+    "strict_delete": true, "reranking": "faithfulness-guided",
+    "model": "gpt-4o-mini"
+  }
+}

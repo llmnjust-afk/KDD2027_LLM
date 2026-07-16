@@ -21,10 +21,7 @@ data/semmeddb/*.ttl
 data/kgqa/raw/
 data/lbd_gold/raw/
 experiments/runs/
-experiments/results/
 experiments/checkpoints/
-figures/*.png
-figures/*.pdf
 .ipynb_checkpoints/
 .DS_Store
 *.swp
